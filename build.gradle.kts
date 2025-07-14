@@ -12,7 +12,8 @@ val slf4jVersion: String by project
 plugins {
     application
     kotlin("jvm") version "2.1.21"
-
+    kotlin("plugin.serialization") version "2.1.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.hexasilith"
