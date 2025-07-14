@@ -29,11 +29,16 @@ class AIService(private val httpClient: HttpClient, private val apiKey: String) 
 
         val response = httpClient.post("https://api.deepseek.com/v1/chat/completions") {
             header("Authorization", "Bearer $apiKey")
-            contentType(ContentType.Application.Json)
+            header("Accept", "application/json")
+            header("Content-Type", "application/json")
+            //contentType(ContentType.Application.Json)
             setBody(Json.encodeToString<ChatRequest>(request))
         }
 
-        return response.body<ChatResponse>().choices.first().message.content
+        val responseText = response.body<String>()
+        println(println("Resposta bruta da API:\n$responseText"))
+
+        return Json.decodeFromString<ChatResponse>(responseText).choices.first().message.content
     }
 
     @Serializable

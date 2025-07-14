@@ -3,9 +3,13 @@ package org.hexasilith
 import com.github.ajalt.clikt.core.*
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.hexasilith.config.AppConfig
 import org.hexasilith.config.DatabaseConfig
 import org.hexasilith.controller.ChatController
@@ -26,7 +30,21 @@ fun main(args: Array<String>) = runBlocking {
     // Incializa HTTP Client
     val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
-            json()
+            json(Json {
+                ignoreUnknownKeys = true  // 👈 Esta é a chave para resolver o problema
+                isLenient = true
+                prettyPrint = true
+            })
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 600_000  // 10 minutos
+            socketTimeoutMillis = 600_000   // 10 minutos
+            connectTimeoutMillis = 300_000  // 5 minutos
+        }
+        defaultRequest {
+            // Headers específicos para DeepSeek
+            header("X-Request-Timeout", "600")  // 10 minutos no header
+            header("Keep-Alive", "timeout=600, max=100")
         }
     }
 
