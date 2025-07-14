@@ -7,17 +7,17 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.prompt
 import com.github.ajalt.clikt.parameters.types.int
 import org.hexasilith.config.DatabaseConfig
+import org.hexasilith.util.ConsolePrinter
 
-class Hello : CliktCommand() {
-    val count: Int by option().int().default(1).help("Number of greetings")
-    val name: String by option().prompt("Your name").help("The person to greet")
+class Chat : CliktCommand() {
 
     override fun run() {
+
         DatabaseConfig.database
-        repeat(count) {
-            echo("Hello $name!")
-        }
+
+        ConsolePrinter().printWelcome()
+
     }
 }
 
-fun main(args: Array<String>) = Hello().main(args)
+fun main(args: Array<String>) = Chat().main(args)
