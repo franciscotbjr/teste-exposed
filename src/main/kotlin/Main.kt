@@ -1,23 +1,51 @@
 package org.hexasilith
 
 import com.github.ajalt.clikt.core.*
-import com.github.ajalt.clikt.parameters.options.default
-import com.github.ajalt.clikt.parameters.options.help
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.prompt
-import com.github.ajalt.clikt.parameters.types.int
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.runBlocking
+import org.hexasilith.config.AppConfig
 import org.hexasilith.config.DatabaseConfig
+import org.hexasilith.controller.ChatController
+import org.hexasilith.repository.ConversationRepository
+import org.hexasilith.repository.MessageRepository
+import org.hexasilith.service.AIService
+import org.hexasilith.service.ConversationService
 import org.hexasilith.util.ConsolePrinter
+import org.hexasilith.util.InputReader
 
-class Chat : CliktCommand() {
+fun main(args: Array<String>) = runBlocking {
 
-    override fun run() {
+     // Inicializa o banco de dados local
+    DatabaseConfig.database
+    val conversationRepository = ConversationRepository(DatabaseConfig.database)
+    val messageRepository = MessageRepository(DatabaseConfig.database)
 
-        DatabaseConfig.database
-
-        ConsolePrinter().printWelcome()
-
+    // Incializa HTTP Client
+    val httpClient = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json()
+        }
     }
-}
 
-fun main(args: Array<String>) = Chat().main(args)
+    // Incializa ConversationService
+    val aiService = AIService(httpClient, AppConfig.apiKey)
+    val conversationService = ConversationService(
+        conversationRepository,
+        messageRepository,
+        aiService
+    )
+
+    val consolePrinter = ConsolePrinter()
+    val inputReader = InputReader()
+
+    val chatController = ChatController(
+        conversationService,
+        consolePrinter,
+        inputReader
+    )
+
+    chatController.start()
+}

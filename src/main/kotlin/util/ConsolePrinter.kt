@@ -25,7 +25,7 @@ class ConsolePrinter {
         println("Type your message or use commands: /new, /list, /load <id>, /delete <id>, /exit")
     }
 
-    fun printCommand(color : Ansi.Color, aValue: String) {
+    private fun printCommand(color : Ansi.Color, aValue: String) {
         val ansiString = ansi()
             .fgBright(color)
             .a(aValue)

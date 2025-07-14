@@ -50,4 +50,16 @@ class ConversationRepository(private val database: Database) {
             it[updatedAt] = LocalDateTime.now()
         }
     }
+
+    fun findById(id: UUID): Conversation? = transaction(database) {
+        Conversations.selectAll()
+            .where { Conversations.id eq id.toString() }.singleOrNull()?.let {
+            Conversation(
+                UUID.fromString(it[Conversations.id]),
+                it[Conversations.title],
+                it[Conversations.createdAt],
+                it[Conversations.updatedAt]
+            )
+        }
+    }
 }

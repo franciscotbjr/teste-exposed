@@ -7,6 +7,7 @@ val cliktVersion: String by project
 val sqliteVersion: String by project
 val typesafeVersion: String by project
 val fusesourceVersion: String by project
+val slf4jVersion: String by project
 
 plugins {
     application
@@ -27,7 +28,8 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
 
-    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
+    //implementation("ch.qos.logback:logback-classic:${logbackVersion}")
+    implementation("org.slf4j:slf4j-nop:${slf4jVersion}")
 
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
@@ -56,6 +58,7 @@ kotlin {
 tasks.jar.configure {
     manifest {
         attributes(mapOf("Main-Class" to "org.hexasilith.MainKt"))
+        attributes["Multi-Release"] = "true"
     }
     configurations["compileClasspath"].forEach {
             file: File ->

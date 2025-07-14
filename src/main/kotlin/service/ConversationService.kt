@@ -1,6 +1,7 @@
 package org.hexasilith.service
 
 import org.hexasilith.model.Conversation
+import org.hexasilith.model.Message
 import org.hexasilith.model.Role
 import org.hexasilith.repository.ConversationRepository
 import org.hexasilith.repository.MessageRepository
@@ -17,6 +18,10 @@ class ConversationService(
 
     fun listConversations(): List<Conversation> {
         return conversationRepository.findAll()
+    }
+
+    fun getConversation(id: UUID): Conversation? {
+        return conversationRepository.findById(id)
     }
 
     suspend fun sendMessage(conversationId: UUID, userMessage: String): String {
@@ -40,5 +45,9 @@ class ConversationService(
         return firstMessage.take(50).let {
             if (firstMessage.length > 50) "$it..." else it
         }
+    }
+
+    fun getMessages(conversationId: UUID): List<Message> {
+        return messageRepository.findByConversationId(conversationId)
     }
 }
