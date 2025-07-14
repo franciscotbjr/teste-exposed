@@ -5,6 +5,7 @@ val exposedVersion: String by project
 val hikariVersion: String by project
 val cliktVersion: String by project
 val sqliteVersion: String by project
+val typesafeVersion: String by project
 
 plugins {
     application
@@ -36,6 +37,8 @@ dependencies {
 
     implementation("com.github.ajalt.clikt:clikt:${cliktVersion}")
     implementation("com.github.ajalt.clikt:clikt-markdown:${cliktVersion}")
+
+    implementation("com.typesafe:config:${typesafeVersion}")
 
     testImplementation(kotlin("test"))
 }
