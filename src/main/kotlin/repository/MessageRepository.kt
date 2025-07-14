@@ -5,7 +5,9 @@ import org.hexasilith.model.Messages
 import org.hexasilith.model.Role
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
@@ -30,5 +32,20 @@ class MessageRepository(private val database: Database) {
                 createdAt = it[Messages.createdAt]
             )
         }
+    }
+
+    fun findByConversationId(conversationId: UUID): List<Message> = transaction(database) {
+        Messages.selectAll()
+            .where { Messages.conversationId eq conversationId }
+            .orderBy(Messages.createdAt to SortOrder.ASC)
+            .map {
+                Message(
+                    it[Messages.id],
+                    it[Messages.conversationId],
+                    Role.fromString(it[Messages.role]),
+                    it[Messages.content],
+                    it[Messages.createdAt]
+                )
+            }
     }
 }
