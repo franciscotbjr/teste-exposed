@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class Message (
-    val id: EntityID<UUID>,
+    val id: UUID = UUID.randomUUID(),
     val conversationId: UUID,
     val role: Role,
     val content: String,

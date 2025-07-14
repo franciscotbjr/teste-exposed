@@ -21,9 +21,11 @@ class ConversationRepository(private val database: Database) {
     fun create(title: String): Conversation = transaction(database) {
         Conversations.insert {
             it[this.title] = title
+            it[this.createdAt] = LocalDateTime.now()
+            it[this.updatedAt] = LocalDateTime.now()
         }.let {
             Conversation(
-                id = it[Conversations.id],
+                id = UUID.fromString(it[Conversations.id]),
                 title = it[Conversations.title],
                 createdAt = it[Conversations.createdAt],
                 updatedAt = it[Conversations.updatedAt]
@@ -34,7 +36,7 @@ class ConversationRepository(private val database: Database) {
     fun findAll(): List<Conversation> = transaction(database) {
         Conversations.selectAll().map {
             Conversation(
-                it[Conversations.id],
+                UUID.fromString(it[Conversations.id]),
                 it[Conversations.title],
                 it[Conversations.createdAt],
                 it[Conversations.updatedAt]
@@ -43,7 +45,7 @@ class ConversationRepository(private val database: Database) {
     }
 
     fun updateTitle(conversationId: UUID, newTitle: String) = transaction(database) {
-        Conversations.update({ Conversations.id eq conversationId}){
+        Conversations.update({ Conversations.id eq conversationId.toString()}){
             it[title] = newTitle
             it[updatedAt] = LocalDateTime.now()
         }

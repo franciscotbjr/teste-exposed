@@ -2,13 +2,12 @@ val ktorVersion: String by project
 val kotlinVersion: String by project
 val logbackVersion: String by project
 val exposedVersion: String by project
-val postgresqlVersion: String by project
 val hikariVersion: String by project
 val cliktVersion: String by project
 val sqliteVersion: String by project
 
 plugins {
-
+    application
     kotlin("jvm") version "2.1.21"
 
 }
@@ -31,9 +30,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-dao:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
-    //implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-java-time:${exposedVersion}")
-    //implementation("org.postgresql:postgresql:${postgresqlVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("com.zaxxer:HikariCP:${hikariVersion}")
 
