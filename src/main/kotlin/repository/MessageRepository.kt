@@ -1,15 +1,14 @@
 package org.hexasilith.repository
 
-import org.hexasilith.model.Conversation
-import org.hexasilith.model.Conversations
+import org.hexasilith.model.Messages
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class ConversationRepository(private val database: Database) {
+class MessageRepository(private val database: Database) {
     init {
         transaction {
-            SchemaUtils.create(Conversations)
+            SchemaUtils.create(Messages)
         }
     }
 }
