@@ -5,9 +5,12 @@ val exposedVersion: String by project
 val postgresqlVersion: String by project
 val hikariVersion: String by project
 val cliktVersion: String by project
+val sqliteVersion: String by project
 
 plugins {
+
     kotlin("jvm") version "2.1.21"
+
 }
 
 group = "org.hexasilith"
@@ -18,6 +21,11 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-client-core:${ktorVersion}")
+    implementation("io.ktor:ktor-client-cio:${ktorVersion}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktorVersion}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktorVersion}")
+
     implementation("ch.qos.logback:logback-classic:${logbackVersion}")
 
     implementation("org.jetbrains.exposed:exposed-core:${exposedVersion}")
@@ -25,7 +33,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:${exposedVersion}")
     //implementation("org.jetbrains.exposed:exposed-kotlin-datetime:${exposedVersion}")
     implementation("org.jetbrains.exposed:exposed-java-time:${exposedVersion}")
-    implementation("org.postgresql:postgresql:${postgresqlVersion}")
+    //implementation("org.postgresql:postgresql:${postgresqlVersion}")
+    implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("com.zaxxer:HikariCP:${hikariVersion}")
 
     implementation("com.github.ajalt.clikt:clikt:${cliktVersion}")

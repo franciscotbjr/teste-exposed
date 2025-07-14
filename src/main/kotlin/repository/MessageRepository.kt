@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
 
 class MessageRepository(private val database: Database) {
+
     init {
         transaction {
             SchemaUtils.create(Messages)
