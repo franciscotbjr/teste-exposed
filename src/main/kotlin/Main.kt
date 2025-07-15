@@ -23,8 +23,11 @@ import org.hexasilith.util.InputReader
 
 fun main(args: Array<String>) = runBlocking {
 
-     // Inicializa o banco de dados local
+    // Inicializa o banco de dados local com Flyway migrations
+    println("Inicializando banco de dados e executando migrações...")
     DatabaseConfig.database
+    println("Migrações executadas com sucesso!")
+
     val conversationRepository = ConversationRepository(DatabaseConfig.database)
     val messageRepository = MessageRepository(DatabaseConfig.database)
     val apiRawResponseRepository = ApiRawResponseRepository(DatabaseConfig.database)

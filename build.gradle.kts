@@ -8,6 +8,7 @@ val sqliteVersion: String by project
 val typesafeVersion: String by project
 val fusesourceVersion: String by project
 val slf4jVersion: String by project
+val flywayVersion: String by project
 
 plugins {
     application
@@ -38,6 +39,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:${exposedVersion}")
     implementation("org.xerial:sqlite-jdbc:${sqliteVersion}")
     implementation("com.zaxxer:HikariCP:${hikariVersion}")
+
+    // Flyway dependencies
+    implementation("org.flywaydb:flyway-core:${flywayVersion}")
 
     implementation("com.github.ajalt.clikt:clikt:${cliktVersion}")
     implementation("com.github.ajalt.clikt:clikt-markdown:${cliktVersion}")

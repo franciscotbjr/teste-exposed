@@ -7,11 +7,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class ApiRawResponseRepository(private val database: Database) {
-    init {
-        transaction(database) {
-            SchemaUtils.create(ApiRawResponses)
-        }
-    }
+    // Tabela será criada via DatabaseConfig + Flyway
 
     fun create(conversationId: UUID, rawJson: String): ApiRawResponse = transaction(database) {
         val id = UUID.randomUUID()

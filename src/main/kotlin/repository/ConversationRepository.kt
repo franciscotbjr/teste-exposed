@@ -3,7 +3,6 @@ package org.hexasilith.repository
 import org.hexasilith.model.Conversation
 import org.hexasilith.model.Conversations
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -12,11 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class ConversationRepository(private val database: Database) {
-    init {
-        transaction {
-            SchemaUtils.create(Conversations)
-        }
-    }
+    // Tabela será criada via DatabaseConfig + Flyway
 
     fun create(title: String): Conversation = transaction(database) {
         Conversations.insert {

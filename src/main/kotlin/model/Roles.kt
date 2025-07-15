@@ -1,8 +1,5 @@
 package org.hexasilith.model
 
-import org.hexasilith.model.Messages.id
-import org.jetbrains.exposed.dao.id.UIntIdTable
-import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.CurrentDateTime
 import org.jetbrains.exposed.sql.javatime.datetime

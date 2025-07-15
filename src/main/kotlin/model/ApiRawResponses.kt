@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.time.LocalDateTime
 import java.util.UUID
 
-object ApiRawResponses : Table() {
+object ApiRawResponses : Table("api_raw_responses") {
     val id = varchar("id", 36).default(UUID.randomUUID().toString())
     val conversationId = varchar("conversation_id", 36).references(Conversations.id, onDelete = ReferenceOption.NO_ACTION)
     val rawJson = text("raw_json")
