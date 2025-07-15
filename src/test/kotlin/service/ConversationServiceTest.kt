@@ -179,7 +179,7 @@ class ConversationServiceTest {
         // Then
         val updatedConversation = conversationService.getConversation(conversation.id)
         assertNotNull(updatedConversation)
-        assertEquals(50, updatedConversation.title.length)
+        assertEquals(53, updatedConversation.title.length)
         assertTrue(updatedConversation.title.endsWith("..."))
         assertEquals(longUserMessage.take(50) + "...", updatedConversation.title)
     }
