@@ -15,6 +15,7 @@ class ConversationRepository(private val database: Database) {
 
     fun create(title: String): Conversation = transaction(database) {
         Conversations.insert {
+            it[this.id] = UUID.randomUUID().toString()
             it[this.title] = title
             it[this.createdAt] = LocalDateTime.now()
             it[this.updatedAt] = LocalDateTime.now()

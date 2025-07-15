@@ -9,6 +9,10 @@ val typesafeVersion: String by project
 val fusesourceVersion: String by project
 val slf4jVersion: String by project
 val flywayVersion: String by project
+val jupiterVersion: String by project
+val mockitoVersion: String by project
+val coroutinesTestVersion: String by project
+val ktorMockVersion: String by project
 
 plugins {
     application
@@ -51,6 +55,11 @@ dependencies {
     implementation("org.fusesource.jansi:jansi:${fusesourceVersion}")
 
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter:${jupiterVersion}")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:${mockitoVersion}")
+    testImplementation("org.mockito:mockito-inline:${mockitoVersion}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesTestVersion}")
+    testImplementation("io.ktor:ktor-client-mock:${ktorMockVersion}")
 }
 
 tasks.test {
