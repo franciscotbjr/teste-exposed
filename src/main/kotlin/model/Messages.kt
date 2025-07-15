@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.javatime.datetime
 import java.util.UUID
 
 object Messages: Table("messages") {
-    val id = varchar("id", 36).uniqueIndex().default(UUID.randomUUID().toString())
+    val id = varchar("id", 36).default(UUID.randomUUID().toString())
     val conversationId = varchar("conversation_id", 36).references(Conversations.id, onDelete = ReferenceOption.NO_ACTION)
     val role = varchar("role", 15).references( Roles.name, onDelete = ReferenceOption.NO_ACTION)
     val content = text("content")

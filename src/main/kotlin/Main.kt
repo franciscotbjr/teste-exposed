@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import org.hexasilith.config.AppConfig
 import org.hexasilith.config.DatabaseConfig
 import org.hexasilith.controller.ChatController
+import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
 import org.hexasilith.repository.MessageRepository
 import org.hexasilith.service.AIService
@@ -26,6 +27,7 @@ fun main(args: Array<String>) = runBlocking {
     DatabaseConfig.database
     val conversationRepository = ConversationRepository(DatabaseConfig.database)
     val messageRepository = MessageRepository(DatabaseConfig.database)
+    val apiRawResponseRepository = ApiRawResponseRepository(DatabaseConfig.database)
 
     // Incializa HTTP Client
     val httpClient = HttpClient(CIO) {
@@ -53,6 +55,7 @@ fun main(args: Array<String>) = runBlocking {
     val conversationService = ConversationService(
         conversationRepository,
         messageRepository,
+        apiRawResponseRepository,
         aiService
     )
 

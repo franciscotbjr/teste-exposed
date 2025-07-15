@@ -1,5 +1,6 @@
 package org.hexasilith.util
 
+import kotlinx.serialization.json.Json
 import java.time.format.DateTimeFormatter
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.Ansi.ansi
@@ -25,6 +26,10 @@ class ConsolePrinter {
         println("Type your message or use commands: /new, /list, /load <id>, /delete <id>, /exit")
     }
 
+    fun printUsage() {
+        println("Type your message or use commands: /new, /list, /load <id>, /delete <id>, /exit")
+    }
+
     private fun printCommand(color : Ansi.Color, aValue: String) {
         val ansiString = ansi()
             .fgBright(color)
@@ -37,7 +42,6 @@ class ConsolePrinter {
 
     fun printPrompt() {
         printCommand(Ansi.Color.GREEN, "> ")
-        System.out.flush()
     }
 
     fun printResponse(response: String) {
@@ -71,4 +75,5 @@ class ConsolePrinter {
             println("$prefix${msg.content}")
         }
     }
+
 }

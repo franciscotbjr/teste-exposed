@@ -3,6 +3,7 @@ package org.hexasilith.service
 import org.hexasilith.model.Conversation
 import org.hexasilith.model.Message
 import org.hexasilith.model.Role
+import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
 import org.hexasilith.repository.MessageRepository
 import java.util.UUID
@@ -10,6 +11,7 @@ import java.util.UUID
 class ConversationService(
     private val conversationRepository: ConversationRepository,
     private val messageRepository: MessageRepository,
+    private val apiRawResponseRepository: ApiRawResponseRepository,
     private val aiService: AIService
 ) {
     fun createConversation(title: String): Conversation {
@@ -29,7 +31,9 @@ class ConversationService(
 
         val history = messageRepository.findByConversationId(conversationId)
 
-        val aiResponse = aiService.chatCompletion(history)
+        val (aiResponse, rawResponse) = aiService.chatCompletion(history)
+
+        apiRawResponseRepository.create(conversationId, rawResponse)
 
         messageRepository.create(conversationId, Role.ASSISTANT, aiResponse)
 

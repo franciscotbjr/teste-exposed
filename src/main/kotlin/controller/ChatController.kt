@@ -33,13 +33,13 @@ class ChatController (
     }
 
     private suspend fun processUserInput(input: String) {
-        if (currentConversationId == null) {
-            startNewConversation()
+        if (currentConversationId != null) {
+            val conversationId = currentConversationId!!
+            val response = conversationService.sendMessage(conversationId, input)
+            consolePrinter.printResponse(response)
+        } else {
+            consolePrinter.printUsage()
         }
-
-        val conversationId = currentConversationId!!
-        val response = conversationService.sendMessage(conversationId, input)
-        consolePrinter.printResponse(response)
     }
 
     private fun startNewConversation() {
