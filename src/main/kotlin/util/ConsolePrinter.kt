@@ -82,4 +82,21 @@ class ConsolePrinter {
         printCommand(Ansi.Color.CYAN, "Deseja reenviar esta mensagem para obter uma resposta? (s/n): ")
     }
 
+    fun showApiLoadingIndicator() {
+        print(ansi()
+            .fgBright(Ansi.Color.YELLOW)
+            .a("🤖 Processando sua mensagem")
+            .reset()
+        )
+    }
+
+    fun hideApiLoadingIndicator() {
+        // Move cursor to beginning of line and clear it
+        print(ansi()
+            .cursorToColumn(0)
+            .eraseLine()
+            .reset()
+        )
+    }
+
 }

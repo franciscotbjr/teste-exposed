@@ -3,6 +3,7 @@ package org.hexasilith.controller
 import org.hexasilith.service.ConversationService
 import org.hexasilith.util.ConsolePrinter
 import org.hexasilith.util.InputReader
+import org.hexasilith.util.LoadingIndicator
 import java.util.UUID
 import kotlin.system.exitProcess
 
@@ -15,6 +16,7 @@ class ChatController (
 ) {
 
     private var currentConversationId: UUID? = null
+    private val loadingIndicator = LoadingIndicator()
 
     suspend fun start() {
         consolePrinter.printWelcome()
@@ -37,12 +39,26 @@ class ChatController (
     private suspend fun processUserInput(input: String) {
         if (currentConversationId != null) {
             val conversationId = currentConversationId!!
-            val response = conversationService.sendMessage(conversationId, input)
-            val conversation = conversationService.getConversation(conversationId)
-            if(conversation?.title == NEW_CONVERSATION) {
-                conversationService.updateConversationTitle(conversationId, input)
+
+            // Iniciar indicador de carregamento
+            loadingIndicator.start("Enviando mensagem para a IA")
+
+            try {
+                val response = conversationService.sendMessage(conversationId, input)
+                val conversation = conversationService.getConversation(conversationId)
+                if(conversation?.title == NEW_CONVERSATION) {
+                    conversationService.updateConversationTitle(conversationId, input)
+                }
+
+                // Parar indicador de carregamento
+                loadingIndicator.stop()
+
+                consolePrinter.printResponse(response)
+            } catch (e: Exception) {
+                // Parar indicador de carregamento em caso de erro
+                loadingIndicator.stop()
+                consolePrinter.printError("Erro ao enviar mensagem: ${e.message}")
             }
-            consolePrinter.printResponse(response)
         } else {
             consolePrinter.printUsage()
         }
@@ -87,10 +103,15 @@ class ChatController (
                         userResponse.equals("y", ignoreCase = true) ||
                         userResponse.equals("yes", ignoreCase = true)) {
 
-                        consolePrinter.printInfo("Reenviando mensagem para a API...")
+                        // Iniciar indicador de carregamento para reenvio
+                        loadingIndicator.start("Reenviando mensagem para a IA")
 
                         try {
                             val aiResponse = conversationService.resendLastUserMessage(uuid)
+
+                            // Parar indicador de carregamento
+                            loadingIndicator.stop()
+
                             if (aiResponse != null) {
                                 consolePrinter.printResponse(aiResponse)
                                 consolePrinter.printInfo("Resposta recebida e salva com sucesso!")
@@ -98,6 +119,8 @@ class ChatController (
                                 consolePrinter.printError("Erro: Não foi possível reenviar a mensagem")
                             }
                         } catch (e: Exception) {
+                            // Parar indicador de carregamento em caso de erro
+                            loadingIndicator.stop()
                             consolePrinter.printError("Erro ao reenviar mensagem: ${e.message}")
                         }
                     } else {
