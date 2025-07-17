@@ -64,14 +64,13 @@ class AIService(private val httpClient: HttpClient, private val apiKey: String) 
         var rawResponse = ""
         if(response.status == HttpStatusCode.OK) {
             rawResponse = response.body<String>()
-            println(println("Resposta bruta da API:\n$rawResponse"))
         }
         return rawResponse
     }
 
     @Serializable
     private data class ChatRequest(
-        val model: String,
+        val model: String,/
         val messages: List<ChatMessage>,
         val temperature: Double
     )

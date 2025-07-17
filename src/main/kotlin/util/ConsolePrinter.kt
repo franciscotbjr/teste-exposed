@@ -83,17 +83,19 @@ class ConsolePrinter {
 
         messages.forEach { msg ->
             val messageDisplay = MessageDisplay.from(msg)
-            val prefix = when (messageDisplay.role) {
-                Role.USER -> ansi().fgBright(Ansi.Color.GREEN).a("You: ").reset()
-                Role.ASSISTANT -> ansi().fgBright(Ansi.Color.BLUE).a("AI: ").reset()
-                Role.SYSTEM -> ansi().fgBright(Ansi.Color.YELLOW).a("System: ").reset()
+            val (prefix, contentColor) = when (messageDisplay.role) {
+                Role.USER -> ansi().fgBright(Ansi.Color.GREEN).a("You: ").reset() to Ansi.Color.GREEN
+                Role.ASSISTANT -> ansi().fgBright(Ansi.Color.BLUE).a("AI: ").reset() to Ansi.Color.BLUE
+                Role.SYSTEM -> ansi().fgBright(Ansi.Color.YELLOW).a("System: ").reset() to Ansi.Color.YELLOW
             }
 
             // Exibe cada linha da mensagem formatada
             val formattedLines = messageDisplay.formattedContent.split("\n")
             formattedLines.forEachIndexed { index, line ->
                 if (index == 0) {
-                    println("$prefix$line")
+                    // Primeira linha: prefixo colorido + conteúdo colorido
+                    print(prefix)
+                    println(ansi().fg(contentColor).a(line).reset())
                 } else {
                     // Para linhas subsequentes, adiciona espaçamento para alinhar com o prefixo
                     val spacing = " ".repeat(when (messageDisplay.role) {
@@ -101,7 +103,8 @@ class ConsolePrinter {
                         Role.ASSISTANT -> 4  // "AI: ".length
                         Role.SYSTEM -> 8  // "System: ".length
                     })
-                    println("$spacing$line")
+                    print(spacing)
+                    println(ansi().fg(contentColor).a(line).reset())
                 }
             }
         }
