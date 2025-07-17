@@ -158,6 +158,15 @@
     -fx-alignment: center-right;
 }
 
+/* WebView para mensagens do usuário com Markdown */
+.user-message-webview {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-background-radius: 18px 18px 5px 18px;
+    -fx-border-radius: 18px 18px 5px 18px;
+}
+
 /* Mensagens da IA (ASSISTANT) */
 .message-row-ai {
     -fx-alignment: center-left;
@@ -194,6 +203,15 @@
     -fx-padding: 3px 5px;
     -fx-text-fill: rgba(255, 255, 255, 0.8);
     -fx-alignment: center-left;
+}
+
+/* WebView para mensagens da IA com Markdown */
+.ai-message-webview {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-background-radius: 18px 18px 18px 5px;
+    -fx-border-radius: 18px 18px 18px 5px;
 }
 
 /* Container de conteúdo da mensagem */

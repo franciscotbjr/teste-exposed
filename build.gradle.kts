@@ -62,9 +62,16 @@ dependencies {
     implementation("org.openjfx:javafx-fxml:${javafxVersion}")
     implementation("org.openjfx:javafx-base:${javafxVersion}")
     implementation("org.openjfx:javafx-graphics:${javafxVersion}")
+    implementation("org.openjfx:javafx-web:${javafxVersion}")
 
     // Kotlinx Coroutines JavaFX
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:${coroutineVersion}")
+
+    // Markdown processing library
+    implementation("org.commonmark:commonmark:0.21.0")
+    implementation("org.commonmark:commonmark-ext-gfm-tables:0.21.0")
+    implementation("org.commonmark:commonmark-ext-gfm-strikethrough:0.21.0")
+    implementation("org.commonmark:commonmark-ext-autolink:0.21.0")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:${jupiterVersion}")
@@ -76,7 +83,7 @@ dependencies {
 
 javafx {
     version = javafxVersion
-    modules = listOf("javafx.controls", "javafx.fxml")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.web")
 }
 
 application {

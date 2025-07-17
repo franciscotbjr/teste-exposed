@@ -8,6 +8,7 @@ import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.web.WebView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.javafx.JavaFx
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 import org.hexasilith.presentation.model.ChatMessage
 import org.hexasilith.presentation.model.ConversationItem
 import org.hexasilith.presentation.util.DataConverter
+import org.hexasilith.presentation.util.MarkdownProcessor
 import org.hexasilith.service.ConversationService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -147,17 +149,45 @@ class IntegratedMainController(
 
     private fun displayMessages(messages: List<ChatMessage>) {
         messagesContainer.children.clear()
+
+        // Contador para rastrear quantos WebViews foram carregados
+        var loadedWebViews = 0
+        val totalWebViews = messages.size
+
         messages.forEach { message ->
-            val messageBox = createMessageBox(message)
+            val messageBox = createMessageBox(message) {
+                // Callback chamado quando cada WebView termina de carregar
+                loadedWebViews++
+
+                // Quando todos os WebViews terminarem de carregar, faz o scroll
+                if (loadedWebViews == totalWebViews) {
+                    Platform.runLater {
+                        scrollToBottom()
+                    }
+                }
+            }
             messagesContainer.children.add(messageBox)
         }
 
-        Platform.runLater {
-            messageArea.vvalue = 1.0
+        // Fallback: se não há mensagens, não há WebViews para carregar
+        if (messages.isEmpty()) {
+            Platform.runLater {
+                scrollToBottom()
+            }
         }
     }
 
-    private fun createMessageBox(message: ChatMessage): HBox {
+    private fun scrollToBottom() {
+        // Aguarda um pouco para garantir que o layout foi calculado
+        Platform.runLater {
+            messageArea.vvalue = 1.0
+
+            // Força uma atualização do layout se necessário
+            messageArea.requestLayout()
+        }
+    }
+
+    private fun createMessageBox(message: ChatMessage, onLoad: () -> Unit = {}): HBox {
         val messageRow = HBox()
         messageRow.spacing = 10.0
         messageRow.padding = javafx.geometry.Insets(8.0, 0.0, 8.0, 0.0)
@@ -175,16 +205,36 @@ class IntegratedMainController(
             messageContent.styleClass.add("message-content-user")
             messageContent.spacing = 4.0
 
-            // Label da mensagem
-            val messageLabel = Label(message.content)
-            messageLabel.styleClass.add("user-message")
-            messageLabel.isWrapText = true
+            // WebView para renderizar Markdown
+            val messageWebView = WebView()
+            messageWebView.styleClass.add("user-message-webview")
+            messageWebView.prefWidth = 600.0
+            messageWebView.prefHeight = -1.0 // Altura automática
+            messageWebView.isContextMenuEnabled = false
+
+            // Desabilitar scrollbars do WebView
+            messageWebView.engine.userStyleSheetLocation = javaClass.getResource("/css/webview-style.css")?.toExternalForm()
+
+            // Renderizar Markdown para HTML
+            val htmlContent = MarkdownProcessor.markdownToStyledHtml(message.content, isUserMessage = true)
+            messageWebView.engine.loadContent(htmlContent)
+
+            // Ajustar altura automaticamente baseado no conteúdo
+            messageWebView.engine.documentProperty().addListener { _, _, _ ->
+                Platform.runLater {
+                    val height = messageWebView.engine.executeScript("document.body.scrollHeight") as? Number
+                    height?.let {
+                        messageWebView.prefHeight = it.toDouble() + 10 // Margem extra
+                        messageWebView.maxHeight = it.toDouble() + 10
+                    }
+                }
+            }
 
             // Timestamp
             val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
             timeLabel.styleClass.add("user-message-time")
 
-            messageContent.children.addAll(messageLabel, timeLabel)
+            messageContent.children.addAll(messageWebView, timeLabel)
 
             // Ícone do usuário
             val userIcon = Label("👤")
@@ -205,16 +255,36 @@ class IntegratedMainController(
             messageContent.styleClass.add("message-content-ai")
             messageContent.spacing = 4.0
 
-            // Label da mensagem
-            val messageLabel = Label(message.content)
-            messageLabel.styleClass.add("ai-message")
-            messageLabel.isWrapText = true
+            // WebView para renderizar Markdown
+            val messageWebView = WebView()
+            messageWebView.styleClass.add("ai-message-webview")
+            messageWebView.prefWidth = 600.0
+            messageWebView.prefHeight = -1.0 // Altura automática
+            messageWebView.isContextMenuEnabled = false
+
+            // Desabilitar scrollbars do WebView
+            messageWebView.engine.userStyleSheetLocation = javaClass.getResource("/css/webview-style.css")?.toExternalForm()
+
+            // Renderizar Markdown para HTML
+            val htmlContent = MarkdownProcessor.markdownToStyledHtml(message.content, isUserMessage = false)
+            messageWebView.engine.loadContent(htmlContent)
+
+            // Ajustar altura automaticamente baseado no conteúdo
+            messageWebView.engine.documentProperty().addListener { _, _, _ ->
+                Platform.runLater {
+                    val height = messageWebView.engine.executeScript("document.body.scrollHeight") as? Number
+                    height?.let {
+                        messageWebView.prefHeight = it.toDouble() + 10 // Margem extra
+                        messageWebView.maxHeight = it.toDouble() + 10
+                    }
+                }
+            }
 
             // Timestamp
             val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
             timeLabel.styleClass.add("ai-message-time")
 
-            messageContent.children.addAll(messageLabel, timeLabel)
+            messageContent.children.addAll(messageWebView, timeLabel)
 
             // Spacer para empurrar conteúdo para a esquerda
             val spacer = Region()

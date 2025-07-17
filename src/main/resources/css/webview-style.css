@@ -1,0 +1,21 @@
+/* Estilos para WebView - Remove scrollbars e ajusta aparência */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Para navegadores Firefox */
+html {
+    scrollbar-width: none;
+}
+
+/* Remove margens e padding do body */
+body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+/* Garante que o conteúdo não ultrapasse os limites */
+* {
+    box-sizing: border-box;
+}
