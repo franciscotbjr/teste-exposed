@@ -3,8 +3,11 @@ package org.hexasilith.controller
 import org.hexasilith.service.ConversationService
 import org.hexasilith.util.ConsolePrinter
 import org.hexasilith.util.InputReader
+import org.hexasilith.util.LoadingIndicator
 import java.util.UUID
 import kotlin.system.exitProcess
+
+private const val NEW_CONVERSATION = "New Conversation"
 
 class ChatController (
     private val conversationService: ConversationService,
@@ -13,6 +16,7 @@ class ChatController (
 ) {
 
     private var currentConversationId: UUID? = null
+    private val loadingIndicator = LoadingIndicator()
 
     suspend fun start() {
         consolePrinter.printWelcome()
@@ -35,15 +39,33 @@ class ChatController (
     private suspend fun processUserInput(input: String) {
         if (currentConversationId != null) {
             val conversationId = currentConversationId!!
-            val response = conversationService.sendMessage(conversationId, input)
-            consolePrinter.printResponse(response)
+
+            // Iniciar indicador de carregamento
+            loadingIndicator.start("Enviando mensagem para a IA")
+
+            try {
+                val response = conversationService.sendMessage(conversationId, input)
+                val conversation = conversationService.getConversation(conversationId)
+                if(conversation?.title == NEW_CONVERSATION) {
+                    conversationService.updateConversationTitle(conversationId, input)
+                }
+
+                // Parar indicador de carregamento
+                loadingIndicator.stop()
+
+                consolePrinter.printResponse(response)
+            } catch (e: Exception) {
+                // Parar indicador de carregamento em caso de erro
+                loadingIndicator.stop()
+                consolePrinter.printError("Erro ao enviar mensagem: ${e.message}")
+            }
         } else {
             consolePrinter.printUsage()
         }
     }
 
     private fun startNewConversation() {
-        currentConversationId = conversationService.createConversation("New Conversation").id
+        currentConversationId = conversationService.createConversation(NEW_CONVERSATION).id
         consolePrinter.printInfo("Started new conversation")
     }
 
@@ -56,7 +78,7 @@ class ChatController (
         }
     }
 
-    private fun loadConversation(id: String) {
+    private suspend fun loadConversation(id: String) {
         try {
             val uuid = UUID.fromString(id)
             val conversation = conversationService.getConversation(uuid)
@@ -64,7 +86,47 @@ class ChatController (
             if (conversation != null) {
                 currentConversationId = uuid
                 val messages = conversationService.getMessages(uuid)
+                if(conversation.title == NEW_CONVERSATION
+                    && messages.isNotEmpty()) {
+                    conversationService.updateConversationTitle(uuid, messages.first().content)
+                }
                 consolePrinter.printConversationHistory(conversation, messages)
+
+                // Verifica se a última mensagem é do USER (sem resposta da IA)
+                if (conversationService.hasPendingUserMessage(uuid)) {
+                    val lastUserMessage = messages.lastOrNull()?.content ?: ""
+                    consolePrinter.printPendingMessageWarning(lastUserMessage)
+
+                    val userResponse = inputReader.readInput().trim()
+                    if (userResponse.equals("s", ignoreCase = true) ||
+                        userResponse.equals("sim", ignoreCase = true) ||
+                        userResponse.equals("y", ignoreCase = true) ||
+                        userResponse.equals("yes", ignoreCase = true)) {
+
+                        // Iniciar indicador de carregamento para reenvio
+                        loadingIndicator.start("Reenviando mensagem para a IA")
+
+                        try {
+                            val aiResponse = conversationService.resendLastUserMessage(uuid)
+
+                            // Parar indicador de carregamento
+                            loadingIndicator.stop()
+
+                            if (aiResponse != null) {
+                                consolePrinter.printResponse(aiResponse)
+                                consolePrinter.printInfo("Resposta recebida e salva com sucesso!")
+                            } else {
+                                consolePrinter.printError("Erro: Não foi possível reenviar a mensagem")
+                            }
+                        } catch (e: Exception) {
+                            // Parar indicador de carregamento em caso de erro
+                            loadingIndicator.stop()
+                            consolePrinter.printError("Erro ao reenviar mensagem: ${e.message}")
+                        }
+                    } else {
+                        consolePrinter.printInfo("Mensagem não reenviada. Você pode continuar a conversa normalmente.")
+                    }
+                }
             } else {
                 consolePrinter.printError("Conversation not found")
             }

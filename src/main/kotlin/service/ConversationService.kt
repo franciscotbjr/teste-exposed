@@ -45,6 +45,15 @@ class ConversationService(
         return aiResponse
     }
 
+    suspend fun updateConversationTitle(conversationId: UUID, newTitle: String): Boolean {
+        return try {
+            conversationRepository.updateTitle(conversationId, generateTitleForConversation(newTitle))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private fun generateTitleForConversation(firstMessage: String) : String {
         return firstMessage.take(50).let {
             if (firstMessage.length > 50) "$it..." else it
@@ -53,5 +62,27 @@ class ConversationService(
 
     fun getMessages(conversationId: UUID): List<Message> {
         return messageRepository.findByConversationId(conversationId)
+    }
+
+    suspend fun resendLastUserMessage(conversationId: UUID): String? {
+        val messages = messageRepository.findByConversationId(conversationId)
+
+        // Verifica se a última mensagem é do USER
+        val lastMessage = messages.lastOrNull()
+        if (lastMessage?.role != Role.USER) {
+            return null
+        }
+
+        val (aiResponse, rawResponse) = aiService.chatCompletion(messages)
+
+        apiRawResponseRepository.create(conversationId, rawResponse)
+        messageRepository.create(conversationId, Role.ASSISTANT, aiResponse)
+
+        return aiResponse
+    }
+
+    fun hasPendingUserMessage(conversationId: UUID): Boolean {
+        val messages = messageRepository.findByConversationId(conversationId)
+        return messages.lastOrNull()?.role == Role.USER
     }
 }
