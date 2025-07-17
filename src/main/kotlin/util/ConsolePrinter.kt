@@ -7,6 +7,8 @@ import org.fusesource.jansi.Ansi.ansi
 import org.hexasilith.model.Conversation
 import org.hexasilith.model.Message
 import org.hexasilith.model.Role
+import org.hexasilith.presentation.ConversationDisplay
+import org.hexasilith.presentation.MessageDisplay
 
 class ConsolePrinter {
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -45,7 +47,18 @@ class ConsolePrinter {
     }
 
     fun printResponse(response: String) {
-        printCommand(Ansi.Color.BLUE, response)
+        val messageDisplay = MessageDisplay.from(
+            org.hexasilith.model.Message(
+                conversationId = java.util.UUID.randomUUID(),
+                role = Role.ASSISTANT,
+                content = response
+            )
+        )
+
+        val formattedLines = messageDisplay.formattedContent.split("\n")
+        formattedLines.forEach { line ->
+            printCommand(Ansi.Color.BLUE, line)
+        }
     }
 
     fun printError(message: String) {
@@ -59,26 +72,52 @@ class ConsolePrinter {
     fun printConversationList(conversations: List<Conversation>) {
         printCommand(Ansi.Color.CYAN, "=== Your Conversations ===")
         conversations.forEach { conv ->
-            println("${conv.id} - ${conv.title} (${conv.updatedAt.format(dateFormatter)})")
+            val conversationDisplay = ConversationDisplay.from(conv)
+            println("${conversationDisplay.id} - ${conversationDisplay.formattedTitle} (${conversationDisplay.formattedDate})")
         }
     }
 
     fun printConversationHistory(conversation: Conversation, messages: List<Message>) {
-        printCommand(Ansi.Color.CYAN, "=== ${conversation.title} ===")
+        val conversationDisplay = ConversationDisplay.from(conversation)
+        printCommand(Ansi.Color.CYAN, "=== ${conversationDisplay.formattedTitle} ===")
 
         messages.forEach { msg ->
-            val prefix = when (msg.role) {
+            val messageDisplay = MessageDisplay.from(msg)
+            val prefix = when (messageDisplay.role) {
                 Role.USER -> ansi().fgBright(Ansi.Color.GREEN).a("You: ").reset()
                 Role.ASSISTANT -> ansi().fgBright(Ansi.Color.BLUE).a("AI: ").reset()
                 Role.SYSTEM -> ansi().fgBright(Ansi.Color.YELLOW).a("System: ").reset()
             }
-            println("$prefix${msg.content}")
+
+            // Exibe cada linha da mensagem formatada
+            val formattedLines = messageDisplay.formattedContent.split("\n")
+            formattedLines.forEachIndexed { index, line ->
+                if (index == 0) {
+                    println("$prefix$line")
+                } else {
+                    // Para linhas subsequentes, adiciona espaçamento para alinhar com o prefixo
+                    val spacing = " ".repeat(when (messageDisplay.role) {
+                        Role.USER -> 5  // "You: ".length
+                        Role.ASSISTANT -> 4  // "AI: ".length
+                        Role.SYSTEM -> 8  // "System: ".length
+                    })
+                    println("$spacing$line")
+                }
+            }
         }
     }
 
     fun printPendingMessageWarning(lastUserMessage: String) {
+        val messageDisplay = MessageDisplay.from(
+            org.hexasilith.model.Message(
+                conversationId = java.util.UUID.randomUUID(),
+                role = Role.USER,
+                content = lastUserMessage
+            )
+        )
+
         printCommand(Ansi.Color.YELLOW, "⚠️  A última mensagem não teve resposta da IA:")
-        printCommand(Ansi.Color.WHITE, "\"${lastUserMessage.take(100)}${if (lastUserMessage.length > 100) "..." else ""}\"")
+        printCommand(Ansi.Color.WHITE, "\"${messageDisplay.formattedContent}\"")
         printCommand(Ansi.Color.CYAN, "Deseja reenviar esta mensagem para obter uma resposta? (s/n): ")
     }
 
