@@ -16,6 +16,7 @@ import kotlinx.coroutines.withContext
 import org.hexasilith.presentation.model.ChatMessage
 import org.hexasilith.presentation.model.ConversationItem
 import org.hexasilith.presentation.util.DataConverter
+import org.hexasilith.presentation.component.MarkdownView
 import org.hexasilith.service.ConversationService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -175,16 +176,17 @@ class IntegratedMainController(
             messageContent.styleClass.add("message-content-user")
             messageContent.spacing = 4.0
 
-            // Label da mensagem
-            val messageLabel = Label(message.content)
-            messageLabel.styleClass.add("user-message")
-            messageLabel.isWrapText = true
+            // MarkdownView para renderizar conteúdo Markdown
+            val markdownView = MarkdownView()
+            markdownView.setMarkdown(message.content, isUserMessage = true)
+            markdownView.prefWidth = 600.0
+            markdownView.maxWidth = 600.0
 
             // Timestamp
             val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
             timeLabel.styleClass.add("user-message-time")
 
-            messageContent.children.addAll(messageLabel, timeLabel)
+            messageContent.children.addAll(markdownView, timeLabel)
 
             // Ícone do usuário
             val userIcon = Label("👤")
@@ -205,16 +207,17 @@ class IntegratedMainController(
             messageContent.styleClass.add("message-content-ai")
             messageContent.spacing = 4.0
 
-            // Label da mensagem
-            val messageLabel = Label(message.content)
-            messageLabel.styleClass.add("ai-message")
-            messageLabel.isWrapText = true
+            // MarkdownView para renderizar conteúdo Markdown
+            val markdownView = MarkdownView()
+            markdownView.setMarkdown(message.content, isUserMessage = false)
+            markdownView.prefWidth = 600.0
+            markdownView.maxWidth = 600.0
 
             // Timestamp
             val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
             timeLabel.styleClass.add("ai-message-time")
 
-            messageContent.children.addAll(messageLabel, timeLabel)
+            messageContent.children.addAll(markdownView, timeLabel)
 
             // Spacer para empurrar conteúdo para a esquerda
             val spacer = Region()

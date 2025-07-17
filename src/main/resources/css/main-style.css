@@ -273,3 +273,65 @@
     -fx-padding: 5px 10px;
     -fx-font-size: 12px;
 }
+
+/* Estilos para o componente MarkdownView */
+.markdown-view {
+    -fx-padding: 8px;
+    -fx-spacing: 6px;
+}
+
+.user-markdown-view {
+    -fx-background-color: #3498db;
+    -fx-background-radius: 18px 18px 5px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+}
+
+.ai-markdown-view {
+    -fx-background-color: #27ae60;
+    -fx-background-radius: 18px 18px 18px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+}
+
+.markdown-header {
+    -fx-text-fill: white;
+    -fx-padding: 4px 0;
+}
+
+.markdown-header-1 {
+    -fx-font-size: 18px;
+}
+
+.markdown-header-2 {
+    -fx-font-size: 16px;
+}
+
+.markdown-header-3 {
+    -fx-font-size: 14px;
+}
+
+.markdown-paragraph {
+    -fx-line-spacing: 2px;
+}
+
+.markdown-code-block {
+    -fx-font-family: "Consolas", "Monaco", monospace;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 4px;
+    -fx-padding: 8px;
+    -fx-text-fill: white;
+}
+
+.markdown-unordered-list,
+.markdown-ordered-list {
+    -fx-padding: 4px 0 4px 16px;
+}
+
+.markdown-link {
+    -fx-text-fill: #87CEEB;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.markdown-link:hover {
+    -fx-text-fill: #ADD8E6;
+}
