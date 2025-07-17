@@ -1,0 +1,199 @@
+/* Estilos gerais */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #f5f5f5;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 0;
+}
+
+.sidebar-header {
+    -fx-background-color: #34495e;
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+    -fx-alignment: center-left;
+}
+
+.sidebar-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.new-conversation-btn {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-min-width: 35px;
+    -fx-min-height: 35px;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.new-conversation-btn:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Lista de conversas */
+.list-view {
+    -fx-background-color: #2c3e50;
+    -fx-border-color: transparent;
+}
+
+.list-view .list-cell {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #34495e;
+}
+
+.list-view .list-cell:selected:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Área de chat */
+.chat-area {
+    -fx-background-color: white;
+}
+
+.chat-header {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.chat-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Área de mensagens */
+.messages-container {
+    -fx-padding: 20px;
+    -fx-spacing: 15px;
+}
+
+.scroll-pane {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: white;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 5px;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #95a5a6;
+}
+
+/* Mensagens */
+.user-message {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 10px 15px;
+    -fx-background-radius: 18px 18px 5px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.ai-message {
+    -fx-background-color: #ecf0f1;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10px 15px;
+    -fx-background-radius: 18px 18px 18px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.time-label {
+    -fx-text-fill: #7f8c8d;
+    -fx-font-size: 11px;
+    -fx-padding: 2px 0 0 0;
+}
+
+/* Área de input */
+.input-area {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px 0 0 0;
+    -fx-spacing: 10px;
+}
+
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+.text-area:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+}
+
+.text-area .content {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+}
+
+.input-controls {
+    -fx-alignment: center-right;
+    -fx-spacing: 10px;
+}
+
+.send-btn {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.send-btn:hover {
+    -fx-background-color: #2980b9;
+}
+
+.send-btn:disabled {
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: #7f8c8d;
+    -fx-cursor: default;
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px 10px;
+    -fx-font-size: 12px;
+}

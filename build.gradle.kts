@@ -13,12 +13,15 @@ val jupiterVersion: String by project
 val mockitoVersion: String by project
 val coroutinesTestVersion: String by project
 val ktorMockVersion: String by project
+val javafxVersion: String by project
+val coroutineVersion: String by project
 
 plugins {
     application
     kotlin("jvm") version "2.1.21"
     kotlin("plugin.serialization") version "2.1.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 group = "org.hexasilith"
@@ -54,12 +57,30 @@ dependencies {
 
     implementation("org.fusesource.jansi:jansi:${fusesourceVersion}")
 
+    // JavaFX dependencies
+    implementation("org.openjfx:javafx-controls:${javafxVersion}")
+    implementation("org.openjfx:javafx-fxml:${javafxVersion}")
+    implementation("org.openjfx:javafx-base:${javafxVersion}")
+    implementation("org.openjfx:javafx-graphics:${javafxVersion}")
+
+    // Kotlinx Coroutines JavaFX
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:${coroutineVersion}")
+
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:${jupiterVersion}")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${mockitoVersion}")
     testImplementation("org.mockito:mockito-inline:${mockitoVersion}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesTestVersion}")
     testImplementation("io.ktor:ktor-client-mock:${ktorMockVersion}")
+}
+
+javafx {
+    version = javafxVersion
+    modules = listOf("javafx.controls", "javafx.fxml")
+}
+
+application {
+    mainClass.set("org.hexasilith.MainKt")
 }
 
 tasks.test {
