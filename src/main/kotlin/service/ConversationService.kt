@@ -45,6 +45,15 @@ class ConversationService(
         return aiResponse
     }
 
+    suspend fun updateConversationTitle(conversationId: UUID, newTitle: String): Boolean {
+        return try {
+            conversationRepository.updateTitle(conversationId, generateTitleForConversation(newTitle))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     private fun generateTitleForConversation(firstMessage: String) : String {
         return firstMessage.take(50).let {
             if (firstMessage.length > 50) "$it..." else it

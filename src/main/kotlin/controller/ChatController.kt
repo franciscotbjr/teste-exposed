@@ -6,6 +6,8 @@ import org.hexasilith.util.InputReader
 import java.util.UUID
 import kotlin.system.exitProcess
 
+private const val NEW_CONVERSATION = "New Conversation"
+
 class ChatController (
     private val conversationService: ConversationService,
     private val consolePrinter: ConsolePrinter,
@@ -36,6 +38,10 @@ class ChatController (
         if (currentConversationId != null) {
             val conversationId = currentConversationId!!
             val response = conversationService.sendMessage(conversationId, input)
+            val conversation = conversationService.getConversation(conversationId)
+            if(conversation?.title == NEW_CONVERSATION) {
+                conversationService.updateConversationTitle(conversationId, input)
+            }
             consolePrinter.printResponse(response)
         } else {
             consolePrinter.printUsage()
@@ -43,7 +49,7 @@ class ChatController (
     }
 
     private fun startNewConversation() {
-        currentConversationId = conversationService.createConversation("New Conversation").id
+        currentConversationId = conversationService.createConversation(NEW_CONVERSATION).id
         consolePrinter.printInfo("Started new conversation")
     }
 
@@ -56,7 +62,7 @@ class ChatController (
         }
     }
 
-    private fun loadConversation(id: String) {
+    private suspend fun loadConversation(id: String) {
         try {
             val uuid = UUID.fromString(id)
             val conversation = conversationService.getConversation(uuid)
@@ -64,6 +70,10 @@ class ChatController (
             if (conversation != null) {
                 currentConversationId = uuid
                 val messages = conversationService.getMessages(uuid)
+                if(conversation.title == NEW_CONVERSATION
+                    && messages.isNotEmpty()) {
+                    conversationService.updateConversationTitle(uuid, messages.first().content)
+                }
                 consolePrinter.printConversationHistory(conversation, messages)
             } else {
                 consolePrinter.printError("Conversation not found")
