@@ -70,7 +70,7 @@ class AIService(private val httpClient: HttpClient, private val apiKey: String) 
 
     @Serializable
     private data class ChatRequest(
-        val model: String,/
+        val model: String,
         val messages: List<ChatMessage>,
         val temperature: Double
     )
