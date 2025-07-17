@@ -1,0 +1,293 @@
+/* Estilos gerais */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: #f5f5f5;
+}
+
+/* Sidebar */
+.sidebar {
+    -fx-background-color: #2c3e50;
+    -fx-padding: 0;
+}
+
+.sidebar-header {
+    -fx-background-color: #34495e;
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+    -fx-alignment: center-left;
+}
+
+.sidebar-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.new-conversation-btn {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-min-width: 35px;
+    -fx-min-height: 35px;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.new-conversation-btn:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Lista de conversas */
+.list-view {
+    -fx-background-color: #2c3e50;
+    -fx-border-color: transparent;
+}
+
+.list-view .list-cell {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #34495e;
+}
+
+.list-view .list-cell:selected:hover {
+    -fx-background-color: #2980b9;
+}
+
+/* Área de chat */
+.chat-area {
+    -fx-background-color: white;
+}
+
+.chat-header {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.chat-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* Área de mensagens */
+.messages-container {
+    -fx-padding: 15px;
+    -fx-spacing: 12px;
+}
+
+.scroll-pane {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-fit-to-width: true;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: white;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: #ecf0f1;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #bdc3c7;
+    -fx-background-radius: 5px;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #95a5a6;
+}
+
+/* Mensagens - Estrutura base */
+.message-row {
+    -fx-spacing: 10px;
+    -fx-padding: 8px 0;
+}
+
+/* Mensagens do USUÁRIO */
+.message-row-user {
+    -fx-alignment: center-right;
+    -fx-padding: 8px 20px 8px 100px;
+}
+
+.user-icon {
+    -fx-text-fill: #3498db;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-alignment: center;
+}
+
+.user-message {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 12px 16px;
+    -fx-background-radius: 18px 18px 5px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+    -fx-max-width: 600px;
+    -fx-pref-width: 600px;
+}
+
+.user-message:hover {
+    -fx-background-color: #2980b9;
+}
+
+.user-message-time {
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 3px 5px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-alignment: center-right;
+}
+
+/* WebView para mensagens do usuário com Markdown */
+.user-message-webview {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-background-radius: 18px 18px 5px 18px;
+    -fx-border-radius: 18px 18px 5px 18px;
+}
+
+/* Mensagens da IA (ASSISTANT) */
+.message-row-ai {
+    -fx-alignment: center-left;
+    -fx-padding: 8px 100px 8px 20px;
+}
+
+.ai-icon {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-alignment: center;
+}
+
+.ai-message {
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-padding: 12px 16px;
+    -fx-background-radius: 18px 18px 18px 5px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+    -fx-max-width: 600px;
+    -fx-pref-width: 600px;
+}
+
+.ai-message:hover {
+    -fx-background-color: #219a52;
+}
+
+.ai-message-time {
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 3px 5px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-alignment: center-left;
+}
+
+/* WebView para mensagens da IA com Markdown */
+.ai-message-webview {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-background-radius: 18px 18px 18px 5px;
+    -fx-border-radius: 18px 18px 18px 5px;
+}
+
+/* Container de conteúdo da mensagem */
+.message-content {
+    -fx-spacing: 4px;
+    -fx-max-width: 600px;
+}
+
+.message-content-user {
+    -fx-alignment: center-right;
+    -fx-max-width: 600px;
+}
+
+.message-content-ai {
+    -fx-alignment: center-left;
+    -fx-max-width: 600px;
+}
+
+/* Área de input */
+.input-area {
+    -fx-background-color: #ecf0f1;
+    -fx-padding: 15px;
+    -fx-border-color: #bdc3c7;
+    -fx-border-width: 1px 0 0 0;
+    -fx-spacing: 10px;
+}
+
+.text-area {
+    -fx-background-color: white;
+    -fx-border-color: #bdc3c7;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+.text-area:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2px;
+}
+
+.text-area .content {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+}
+
+.input-controls {
+    -fx-alignment: center-right;
+    -fx-spacing: 10px;
+}
+
+.send-btn {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.send-btn:hover {
+    -fx-background-color: #2980b9;
+}
+
+.send-btn:disabled {
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: #7f8c8d;
+    -fx-cursor: default;
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-background-color: #2c3e50;
+    -fx-text-fill: white;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px 10px;
+    -fx-font-size: 12px;
+}
