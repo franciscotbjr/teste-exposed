@@ -6,8 +6,11 @@ import javafx.collections.ObservableList
 import javafx.fxml.FXML
 import javafx.geometry.Pos
 import javafx.scene.control.*
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.layout.StackPane
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.javafx.JavaFx
@@ -138,29 +141,72 @@ class MainController {
     }
 
     private fun createMessageBox(message: ChatMessage): HBox {
-        val messageBox = HBox()
-        messageBox.spacing = 10.0
-
-        val messageLabel = Label(message.content)
-        messageLabel.isWrapText = true
-        messageLabel.maxWidth = 400.0
-        messageLabel.styleClass.add(if (message.isUser) "user-message" else "ai-message")
-
-        val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
-        timeLabel.styleClass.add("time-label")
-
-        val contentBox = VBox(messageLabel, timeLabel)
-        contentBox.spacing = 5.0
+        val messageRow = HBox()
+        messageRow.spacing = 10.0
+        messageRow.padding = javafx.geometry.Insets(8.0, 0.0, 8.0, 0.0)
 
         if (message.isUser) {
-            messageBox.alignment = Pos.CENTER_RIGHT
-            messageBox.children.add(contentBox)
+            // Mensagem do usuário - estrutura: [spacer] [content] [icon]
+            messageRow.styleClass.add("message-row-user")
+
+            // Spacer para empurrar conteúdo para a direita
+            val spacer = Region()
+            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS)
+
+            // Container do conteúdo da mensagem
+            val messageContent = VBox()
+            messageContent.styleClass.add("message-content-user")
+            messageContent.spacing = 4.0
+
+            // Label da mensagem
+            val messageLabel = Label(message.content)
+            messageLabel.styleClass.add("user-message")
+            messageLabel.isWrapText = true
+
+            // Timestamp
+            val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
+            timeLabel.styleClass.add("user-message-time")
+
+            messageContent.children.addAll(messageLabel, timeLabel)
+
+            // Ícone do usuário
+            val userIcon = Label("👤")
+            userIcon.styleClass.add("user-icon")
+
+            messageRow.children.addAll(spacer, messageContent, userIcon)
+
         } else {
-            messageBox.alignment = Pos.CENTER_LEFT
-            messageBox.children.add(contentBox)
+            // Mensagem da IA - estrutura: [icon] [content] [spacer]
+            messageRow.styleClass.add("message-row-ai")
+
+            // Ícone da IA
+            val aiIcon = Label("🤖")
+            aiIcon.styleClass.add("ai-icon")
+
+            // Container do conteúdo da mensagem
+            val messageContent = VBox()
+            messageContent.styleClass.add("message-content-ai")
+            messageContent.spacing = 4.0
+
+            // Label da mensagem
+            val messageLabel = Label(message.content)
+            messageLabel.styleClass.add("ai-message")
+            messageLabel.isWrapText = true
+
+            // Timestamp
+            val timeLabel = Label(message.timestamp.format(DateTimeFormatter.ofPattern("HH:mm")))
+            timeLabel.styleClass.add("ai-message-time")
+
+            messageContent.children.addAll(messageLabel, timeLabel)
+
+            // Spacer para empurrar conteúdo para a esquerda
+            val spacer = Region()
+            HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS)
+
+            messageRow.children.addAll(aiIcon, messageContent, spacer)
         }
 
-        return messageBox
+        return messageRow
     }
 
     private fun sendMessage() {

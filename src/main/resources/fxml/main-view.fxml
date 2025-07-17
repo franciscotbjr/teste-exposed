@@ -28,7 +28,7 @@
             </HBox>
             <ScrollPane fx:id="messageArea" fitToWidth="true" VBox.vgrow="ALWAYS">
                <content>
-                  <VBox fx:id="messagesContainer" spacing="10.0" styleClass="messages-container" />
+                  <VBox fx:id="messagesContainer" spacing="5.0" styleClass="messages-container" fillWidth="true" />
                </content>
             </ScrollPane>
             <VBox styleClass="input-area">

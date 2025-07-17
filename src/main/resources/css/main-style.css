@@ -86,13 +86,14 @@
 
 /* Área de mensagens */
 .messages-container {
-    -fx-padding: 20px;
-    -fx-spacing: 15px;
+    -fx-padding: 15px;
+    -fx-spacing: 12px;
 }
 
 .scroll-pane {
     -fx-background-color: white;
     -fx-border-color: transparent;
+    -fx-fit-to-width: true;
 }
 
 .scroll-pane .viewport {
@@ -113,27 +114,102 @@
     -fx-background-color: #95a5a6;
 }
 
-/* Mensagens */
+/* Mensagens - Estrutura base */
+.message-row {
+    -fx-spacing: 10px;
+    -fx-padding: 8px 0;
+}
+
+/* Mensagens do USUÁRIO */
+.message-row-user {
+    -fx-alignment: center-right;
+    -fx-padding: 8px 20px 8px 100px;
+}
+
+.user-icon {
+    -fx-text-fill: #3498db;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-alignment: center;
+}
+
 .user-message {
     -fx-background-color: #3498db;
     -fx-text-fill: white;
-    -fx-padding: 10px 15px;
+    -fx-padding: 12px 16px;
     -fx-background-radius: 18px 18px 5px 18px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+    -fx-max-width: 600px;
+    -fx-pref-width: 600px;
+}
+
+.user-message:hover {
+    -fx-background-color: #2980b9;
+}
+
+.user-message-time {
+    -fx-font-size: 11px;
+    -fx-font-style: italic;
+    -fx-padding: 3px 5px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-alignment: center-right;
+}
+
+/* Mensagens da IA (ASSISTANT) */
+.message-row-ai {
+    -fx-alignment: center-left;
+    -fx-padding: 8px 100px 8px 20px;
+}
+
+.ai-icon {
+    -fx-text-fill: #e74c3c;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-min-width: 30px;
+    -fx-alignment: center;
 }
 
 .ai-message {
-    -fx-background-color: #ecf0f1;
-    -fx-text-fill: #2c3e50;
-    -fx-padding: 10px 15px;
+    -fx-background-color: #27ae60;
+    -fx-text-fill: white;
+    -fx-padding: 12px 16px;
     -fx-background-radius: 18px 18px 18px 5px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);
+    -fx-font-size: 14px;
+    -fx-wrap-text: true;
+    -fx-max-width: 600px;
+    -fx-pref-width: 600px;
 }
 
-.time-label {
-    -fx-text-fill: #7f8c8d;
+.ai-message:hover {
+    -fx-background-color: #219a52;
+}
+
+.ai-message-time {
     -fx-font-size: 11px;
-    -fx-padding: 2px 0 0 0;
+    -fx-font-style: italic;
+    -fx-padding: 3px 5px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+    -fx-alignment: center-left;
+}
+
+/* Container de conteúdo da mensagem */
+.message-content {
+    -fx-spacing: 4px;
+    -fx-max-width: 600px;
+}
+
+.message-content-user {
+    -fx-alignment: center-right;
+    -fx-max-width: 600px;
+}
+
+.message-content-ai {
+    -fx-alignment: center-left;
+    -fx-max-width: 600px;
 }
 
 /* Área de input */

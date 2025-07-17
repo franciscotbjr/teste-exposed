@@ -4,7 +4,6 @@ import org.hexasilith.model.Conversation
 import org.hexasilith.model.Message
 import org.hexasilith.presentation.model.ChatMessage
 import org.hexasilith.presentation.model.ConversationItem
-import java.time.LocalDateTime
 
 object DataConverter {
 
@@ -19,7 +18,7 @@ object DataConverter {
     fun toChatMessage(message: Message): ChatMessage {
         return ChatMessage(
             content = message.content,
-            isUser = message.role.name == "user",
+            isUser = message.role == org.hexasilith.model.Role.USER,
             timestamp = message.createdAt
         )
     }
