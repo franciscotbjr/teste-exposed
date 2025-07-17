@@ -180,7 +180,7 @@ class IntegratedMainController(
     private fun scrollToBottom() {
         // Aguarda um pouco para garantir que o layout foi calculado
         Platform.runLater {
-            messageArea.vvalue = 1.0
+            messageArea.vvalue = 0.0
 
             // Força uma atualização do layout se necessário
             messageArea.requestLayout()

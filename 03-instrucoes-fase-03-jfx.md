@@ -1,10 +1,10 @@
 ## Renderização de Markdowns nas Mensagens no Chat 
 01 - As mensagens na área de chat devem exibir corretamente os textos formatados em Markdown, como negrito, itálico, links e listas.
+02 - Substituir o componente de exibição de mensagens atual, o WebView, por um que suporte a renderização de Markdown.
 
 ## Detalhes da Implementação
-1) Para renderizar o Markdown, utilize uma biblioteca como `commonmark-java` ou `flexmark-java`.
+1) Para renderizar o Markdown, utilize o componente `MarkdownView` conforme descrito no arquivo `03_1-instruções-markdown.md`.
 2) As mensagens devem ser processadas para converter o Markdown em HTML.
-3) Utilize um componente JavaFX como `WebView` ou `TextFlow` para exibir o HTML renderizado.
 
 ## Manter
 00 - Manter o carregamento das mensagens exatamente como está, sem alterações.
