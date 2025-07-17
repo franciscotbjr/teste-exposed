@@ -76,4 +76,10 @@ class ConsolePrinter {
         }
     }
 
+    fun printPendingMessageWarning(lastUserMessage: String) {
+        printCommand(Ansi.Color.YELLOW, "⚠️  A última mensagem não teve resposta da IA:")
+        printCommand(Ansi.Color.WHITE, "\"${lastUserMessage.take(100)}${if (lastUserMessage.length > 100) "..." else ""}\"")
+        printCommand(Ansi.Color.CYAN, "Deseja reenviar esta mensagem para obter uma resposta? (s/n): ")
+    }
+
 }

@@ -75,6 +75,35 @@ class ChatController (
                     conversationService.updateConversationTitle(uuid, messages.first().content)
                 }
                 consolePrinter.printConversationHistory(conversation, messages)
+
+                // Verifica se a última mensagem é do USER (sem resposta da IA)
+                if (conversationService.hasPendingUserMessage(uuid)) {
+                    val lastUserMessage = messages.lastOrNull()?.content ?: ""
+                    consolePrinter.printPendingMessageWarning(lastUserMessage)
+
+                    val userResponse = inputReader.readInput().trim()
+                    if (userResponse.equals("s", ignoreCase = true) ||
+                        userResponse.equals("sim", ignoreCase = true) ||
+                        userResponse.equals("y", ignoreCase = true) ||
+                        userResponse.equals("yes", ignoreCase = true)) {
+
+                        consolePrinter.printInfo("Reenviando mensagem para a API...")
+
+                        try {
+                            val aiResponse = conversationService.resendLastUserMessage(uuid)
+                            if (aiResponse != null) {
+                                consolePrinter.printResponse(aiResponse)
+                                consolePrinter.printInfo("Resposta recebida e salva com sucesso!")
+                            } else {
+                                consolePrinter.printError("Erro: Não foi possível reenviar a mensagem")
+                            }
+                        } catch (e: Exception) {
+                            consolePrinter.printError("Erro ao reenviar mensagem: ${e.message}")
+                        }
+                    } else {
+                        consolePrinter.printInfo("Mensagem não reenviada. Você pode continuar a conversa normalmente.")
+                    }
+                }
             } else {
                 consolePrinter.printError("Conversation not found")
             }
