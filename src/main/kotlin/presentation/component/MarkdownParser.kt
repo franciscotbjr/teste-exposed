@@ -175,33 +175,30 @@ class MarkdownParser {
 
     /**
      * Analisa elementos inline dentro de um texto usando CommonMark spec
+     * Versão simplificada que processa um padrão por vez
      */
     private fun parseInlineElements(text: String): List<InlineElement> {
         val elements = mutableListOf<InlineElement>()
         var remainingText = text
 
         while (remainingText.isNotEmpty()) {
-            val nextMatch = findNextInlineElement(remainingText)
+            val match = findFirstMatch(remainingText)
 
-            if (nextMatch != null) {
+            if (match != null) {
                 // Adicionar texto antes do match
-                if (nextMatch.startIndex > 0) {
-                    val plainText = remainingText.substring(0, nextMatch.startIndex)
-                    if (plainText.isNotEmpty()) {
-                        elements.add(InlineElement.PlainText(plainText))
-                    }
+                if (match.startIndex > 0) {
+                    val plainText = remainingText.substring(0, match.startIndex)
+                    elements.add(InlineElement.PlainText(plainText))
                 }
 
                 // Adicionar elemento formatado
-                elements.add(nextMatch.element)
+                elements.add(match.element)
 
                 // Continuar com o resto do texto
-                remainingText = remainingText.substring(nextMatch.endIndex)
+                remainingText = remainingText.substring(match.endIndex)
             } else {
-                // Não há mais elementos formatados, adicionar resto como texto simples
-                if (remainingText.isNotEmpty()) {
-                    elements.add(InlineElement.PlainText(remainingText))
-                }
+                // Não há mais elementos formatados
+                elements.add(InlineElement.PlainText(remainingText))
                 break
             }
         }
@@ -210,33 +207,29 @@ class MarkdownParser {
     }
 
     /**
-     * Encontra o próximo elemento inline no texto
-     * Corrigido para lidar adequadamente com formatação aninhada
+     * Encontra o primeiro match de elemento inline no texto
      */
-    private fun findNextInlineElement(text: String): InlineMatch? {
+    private fun findFirstMatch(text: String): InlineMatch? {
+        // Padrões em ordem de precedência (mais específicos primeiro)
         val patterns = listOf(
-            // Negrito + Itálico ***text*** (deve vir antes dos outros)
-            "\\*\\*\\*([^*]+)\\*\\*\\*".toRegex() to { match: MatchResult ->
+            // Negrito + Itálico ***text***
+            "\\*\\*\\*(.+?)\\*\\*\\*".toRegex() to { match: MatchResult ->
                 InlineElement.BoldItalicText(match.groupValues[1])
             },
-            // Negrito + Itálico ___text___
-            "___([^_]+)___".toRegex() to { match: MatchResult ->
-                InlineElement.BoldItalicText(match.groupValues[1])
-            },
-            // Negrito com ** - versão mais robusta que captura conteúdo aninhado
-            "\\*\\*([^*]+(?:\\*[^*]+)*)\\*\\*".toRegex() to { match: MatchResult ->
+            // Negrito com ** - permite aninhamento de itálico
+            "\\*\\*(.+?)\\*\\*".toRegex() to { match: MatchResult ->
                 InlineElement.BoldText(match.groupValues[1])
             },
             // Negrito com __
-            "__([^_]+)__".toRegex() to { match: MatchResult ->
+            "__(.+?)__".toRegex() to { match: MatchResult ->
                 InlineElement.BoldText(match.groupValues[1])
             },
-            // Itálico com * - mais restritivo para evitar conflitos
-            "(?<!\\*)\\*([^*]+)\\*(?!\\*)".toRegex() to { match: MatchResult ->
+            // Itálico com *
+            "(?<!\\*)\\*(.+?)\\*(?!\\*)".toRegex() to { match: MatchResult ->
                 InlineElement.ItalicText(match.groupValues[1])
             },
-            // Itálico com _ (alternativa)
-            "(?<!_)_([^_]+)_(?!_)".toRegex() to { match: MatchResult ->
+            // Itálico com _
+            "(?<!_)_(.+?)_(?!_)".toRegex() to { match: MatchResult ->
                 InlineElement.ItalicText(match.groupValues[1])
             },
             // Código inline
@@ -248,7 +241,7 @@ class MarkdownParser {
                 InlineElement.Link(match.groupValues[1], match.groupValues[2])
             },
             // Texto tachado
-            "~~([^~]+)~~".toRegex() to { match: MatchResult ->
+            "~~(.+?)~~".toRegex() to { match: MatchResult ->
                 InlineElement.StrikeThrough(match.groupValues[1])
             }
         )
@@ -257,7 +250,7 @@ class MarkdownParser {
 
         for ((regex, factory) in patterns) {
             val match = regex.find(text)
-            if (match != null && match.groupValues[1].isNotEmpty()) {
+            if (match != null && match.groupValues.size > 1 && match.groupValues[1].isNotEmpty()) {
                 val inlineMatch = InlineMatch(
                     element = factory(match),
                     startIndex = match.range.first,
