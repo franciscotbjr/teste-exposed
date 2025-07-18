@@ -314,24 +314,51 @@
 }
 
 .markdown-code-block {
-    -fx-font-family: "Consolas", "Monaco", monospace;
+    -fx-font-family: "Consolas", "Monaco", "Courier New", monospace;
     -fx-background-color: rgba(255, 255, 255, 0.1);
     -fx-background-radius: 4px;
-    -fx-padding: 8px;
+    -fx-padding: 12px;
     -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.markdown-blockquote {
+    -fx-border-color: rgba(255, 255, 255, 0.4);
+    -fx-border-width: 0 0 0 3px;
+    -fx-padding: 8px 0 8px 12px;
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 2px;
+}
+
+.markdown-horizontal-rule {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+    -fx-min-height: 1px;
+    -fx-max-height: 1px;
+    -fx-pref-height: 1px;
+}
+
+.markdown-bold-italic {
+    -fx-font-weight: bold;
+    -fx-font-style: italic;
 }
 
 .markdown-unordered-list,
 .markdown-ordered-list {
-    -fx-padding: 4px 0 4px 16px;
+    -fx-padding: 4px 0 4px 20px;
+    -fx-spacing: 2px;
 }
 
 .markdown-link {
     -fx-text-fill: #87CEEB;
     -fx-underline: true;
     -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
 }
 
 .markdown-link:hover {
-    -fx-text-fill: #ADD8E6;
+    -fx-text-fill: #B0E0E6;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
 }
