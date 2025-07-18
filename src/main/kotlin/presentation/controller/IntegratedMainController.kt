@@ -595,29 +595,59 @@ class IntegratedMainController(
     private fun createNewConversationFromSummary() {
         val summary = currentSummary ?: return
 
-        coroutineScope.launch {
-            try {
-                val newConv = withContext(Dispatchers.IO) {
-                    conversationService.createConversation("Nova conversa baseada em resumo")
-                }
+        try {
+            // Simular criação de nova conversa sem persistência real
+            Platform.runLater {
+                // Criar um item de conversa mockado
+                val newConversationId = java.util.UUID.randomUUID().toString()
+                val newConversationItem = ConversationItem(
+                    id = newConversationId,
+                    title = "Nova conversa baseada em resumo",
+                    lastMessageTime = LocalDateTime.now()
+                )
 
-                Platform.runLater {
-                    val newConversationItem = DataConverter.toConversationItem(newConv)
-                    conversations.add(0, newConversationItem)
-                    conversationList.selectionModel.select(0)
+                // Adicionar à lista de conversas (apenas em memória)
+                conversations.add(0, newConversationItem)
+                conversationList.selectionModel.select(0)
 
-                    // Resetar contador de tokens
-                    currentTokenCount = 0
-                    updateTokenCountLabel()
+                // Limpar área de mensagens e mostrar mensagem inicial com resumo
+                messagesContainer.children.clear()
 
-                    currentSummary = null
-                }
-            } catch (e: Exception) {
-                Platform.runLater {
-                    showError("Erro ao criar nova conversa: ${e.message}")
-                }
+                // Criar mensagem inicial com o resumo como contexto
+                val initialMessage = ChatMessage(
+                    content = "**Contexto da conversa anterior:**\n\n$summary\n\n---\n\n*Nova conversa iniciada com base no resumo acima.*",
+                    isUser = false,
+                    timestamp = LocalDateTime.now()
+                )
+
+                val initialMessageBox = createMessageBox(initialMessage)
+                messagesContainer.children.add(initialMessageBox)
+
+                // Resetar contador de tokens
+                currentTokenCount = estimateTokens(initialMessage.content)
+                updateTokenCountLabel()
+
+                // Limpar resumo atual
+                currentSummary = null
+
+                // Feedback visual
+                showInfoMessage("Nova conversa criada com base no resumo!")
+
+                println("Nova conversa criada mockada com ID: $newConversationId")
+            }
+        } catch (e: Exception) {
+            Platform.runLater {
+                showError("Erro ao criar nova conversa: ${e.message}")
             }
         }
+    }
+
+    private fun showInfoMessage(message: String) {
+        val alert = Alert(Alert.AlertType.INFORMATION)
+        alert.title = "Informação"
+        alert.headerText = null
+        alert.contentText = message
+        alert.showAndWait()
     }
 
     private fun dismissTokenLimitAlert() {

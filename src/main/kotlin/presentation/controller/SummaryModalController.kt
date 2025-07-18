@@ -2,10 +2,15 @@ package org.hexasilith.presentation.controller
 
 import javafx.application.Platform
 import javafx.fxml.FXML
+import javafx.scene.Parent
+import javafx.scene.Scene
 import javafx.scene.control.*
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.stage.Modality
 import javafx.stage.Stage
 import org.hexasilith.presentation.component.MarkdownView
 
@@ -42,7 +47,7 @@ class SummaryModalController {
 
     private fun setupButtons() {
         closeSummaryButton.setOnAction { closeModal() }
-        newConversationFromSummaryButton.setOnAction { createNewConversation() }
+        newConversationFromSummaryButton.setOnAction { showNewConversationConfirmation() }
         copySummaryButton.setOnAction { copySummaryToClipboard() }
         exportSummaryButton.setOnAction { exportSummary() }
     }
@@ -79,6 +84,114 @@ class SummaryModalController {
 
     private fun closeModal() {
         modalStage.close()
+    }
+
+    private fun showNewConversationConfirmation() {
+        try {
+            // Criar modal de confirmação programaticamente
+            val confirmationStage = Stage()
+            confirmationStage.title = "Confirmar Nova Conversa"
+            confirmationStage.initModality(Modality.APPLICATION_MODAL)
+            confirmationStage.initOwner(modalStage)
+            confirmationStage.isResizable = false
+
+            // Criar layout principal
+            val rootVBox = VBox()
+            rootVBox.styleClass.add("confirmation-modal")
+            rootVBox.prefWidth = 480.0
+            rootVBox.prefHeight = 280.0
+
+            // Header
+            val headerHBox = HBox()
+            headerHBox.styleClass.add("confirmation-header")
+            headerHBox.prefHeight = 60.0
+            headerHBox.spacing = 15.0
+            headerHBox.padding = javafx.geometry.Insets(20.0)
+
+            val iconLabel = Label("🚀")
+            iconLabel.styleClass.add("confirmation-icon")
+
+            val titleLabel = Label("Confirmar Nova Conversa")
+            titleLabel.styleClass.add("confirmation-title")
+
+            val headerSpacer = Region()
+            HBox.setHgrow(headerSpacer, javafx.scene.layout.Priority.ALWAYS)
+
+            headerHBox.children.addAll(iconLabel, titleLabel, headerSpacer)
+
+            // Content
+            val contentVBox = VBox()
+            contentVBox.styleClass.add("confirmation-content")
+            contentVBox.spacing = 12.0
+            contentVBox.padding = javafx.geometry.Insets(20.0)
+            VBox.setVgrow(contentVBox, javafx.scene.layout.Priority.ALWAYS)
+
+            val messageLabel = Label("Deseja criar uma nova conversa baseada neste resumo?")
+            messageLabel.styleClass.add("confirmation-message")
+            messageLabel.isWrapText = true
+
+            val infoLabel = Label("Uma nova conversa será iniciada com o contexto do resumo atual.")
+            infoLabel.styleClass.add("confirmation-info")
+            infoLabel.isWrapText = true
+
+            val warningLabel = Label("A conversa atual permanecerá salva no histórico.")
+            warningLabel.styleClass.add("confirmation-warning")
+            warningLabel.isWrapText = true
+
+            contentVBox.children.addAll(messageLabel, infoLabel, warningLabel)
+
+            // Buttons
+            val buttonsHBox = HBox()
+            buttonsHBox.styleClass.add("confirmation-buttons")
+            buttonsHBox.prefHeight = 80.0
+            buttonsHBox.spacing = 12.0
+            buttonsHBox.padding = javafx.geometry.Insets(15.0, 20.0, 15.0, 20.0)
+            buttonsHBox.alignment = javafx.geometry.Pos.CENTER_RIGHT
+
+            val buttonsSpacer = Region()
+            HBox.setHgrow(buttonsSpacer, javafx.scene.layout.Priority.ALWAYS)
+
+            val cancelButton = Button("Cancelar")
+            cancelButton.styleClass.add("cancel-btn")
+            cancelButton.prefWidth = 120.0
+            cancelButton.prefHeight = 40.0
+            cancelButton.isCancelButton = true
+
+            val confirmButton = Button("Confirmar")
+            confirmButton.styleClass.add("confirm-btn")
+            confirmButton.prefWidth = 120.0
+            confirmButton.prefHeight = 40.0
+            confirmButton.isDefaultButton = true
+
+            buttonsHBox.children.addAll(buttonsSpacer, cancelButton, confirmButton)
+
+            // Adicionar tudo ao layout principal
+            rootVBox.children.addAll(headerHBox, contentVBox, buttonsHBox)
+
+            // Configurar ações dos botões
+            cancelButton.setOnAction {
+                println("Criação de nova conversa cancelada pelo usuário")
+                confirmationStage.close()
+            }
+
+            confirmButton.setOnAction {
+                confirmationStage.close()
+                createNewConversation()
+            }
+
+            // Criar cena e aplicar estilos
+            val scene = Scene(rootVBox, 480.0, 280.0)
+            scene.stylesheets.add(javaClass.getResource("/css/main-style.css")?.toExternalForm())
+            confirmationStage.scene = scene
+
+            // Centralizar e exibir
+            confirmationStage.centerOnScreen()
+            confirmationStage.showAndWait()
+
+        } catch (e: Exception) {
+            showError("Erro ao abrir confirmação: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     private fun createNewConversation() {
