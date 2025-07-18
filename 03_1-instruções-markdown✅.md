@@ -1,34 +1,34 @@
 ## A Realidade Atual do Ecosistema JavaFX
-- Infelizmente, não existe um componente JavaFX nativo que renderize Markdown diretamente. O JavaFX foi projetado com foco em interfaces gráficas tradicionais, e o suporte a formatos de marcação não foi uma prioridade na sua concepção original. Isso significa que, tecnicamente, qualquer renderização de Markdown precisará passar por algum processo de conversão ou interpretação.
+    - Infelizmente, não existe um componente JavaFX nativo que renderize Markdown diretamente. O JavaFX foi projetado com foco em interfaces gráficas tradicionais, e o suporte a formatos de marcação não foi uma prioridade na sua concepção original. Isso significa que, tecnicamente, qualquer renderização de Markdown precisará passar por algum processo de conversão ou interpretação.
 
 ## Detalhes da Implementação
-- Vamos criar um novo componente JavaFX chamado `MarkdownView` que será responsável por renderizar o Markdown diretamente em componentes JavaFX.
-- O `MarkdownView` receberá uma string de Markdown e converterá cada elemento em componentes JavaFX nativos, como `Label`, `Text`, `Hyperlink`, etc.
-- O componente será capaz de lidar com formatação básica como negrito, itálico, links e listas.
-- O `MarkdownView` será utilizado na área de chat para exibir as mensagens formatadas.
-- Vamos garantir que o `MarkdownView` seja eficiente e responsivo, utilizando técnicas de layout adequadas do JavaFX.
-- O `MarkdownView` será projetado para ser reutilizável em outras partes do aplicativo, caso necessário.
-- Vamos garantir que o `MarkdownView` seja facilmente integrável com o restante do sistema, mantendo a modularidade e a separação de responsabilidades.
-- O `MarkdownView` será testado para garantir que renderize corretamente os diferentes tipos de Markdown e que se comporte bem em diferentes tamanhos de tela e resoluções.
-- Vamos garantir que o `MarkdownView` seja compatível com as diretrizes de acessibilidade, permitindo que usuários com deficiências visuais possam interagir com o conteúdo renderizado.
-- Vamos documentar o `MarkdownView` para que outros desenvolvedores possam entender como utilizá-lo e integrá-lo em seus próprios projetos.
-- Vamos garantir que o `MarkdownView` seja facilmente extensível, permitindo que novos tipos de formatação possam ser adicionados no futuro sem grandes dificuldades.
-- Vamos garantir que o `MarkdownView` seja testado em diferentes versões do JavaFX para garantir compatibilidade e estabilidade.
-- Vamos garantir que o `MarkdownView` seja otimizado para desempenho, evitando renderizações desnecessárias e garantindo uma experiência fluida para o usuário.
-- Vamos garantir que o `MarkdownView` seja facilmente configurável, permitindo que desenvolvedores possam personalizar seu comportamento e aparência conforme necessário.
-- Vamos garantir que o `MarkdownView` seja integrado com o sistema de mensagens existente, permitindo que as mensagens enviadas e recebidas sejam renderizadas corretamente.
-- Vamos garantir que o `MarkdownView` esteja pronto para externalizado em um repositório público, permitindo que outros desenvolvedores possam utilizá-lo em seus próprios projetos.
+    - Vamos criar um novo componente JavaFX chamado `MarkdownView` que será responsável por renderizar o Markdown diretamente em componentes JavaFX.
+    - O `MarkdownView` receberá uma string de Markdown e converterá cada elemento em componentes JavaFX nativos, como `Label`, `Text`, `Hyperlink`, etc.
+    - O componente será capaz de lidar com formatação básica como negrito, itálico, links e listas.
+    - O `MarkdownView` será utilizado na área de chat para exibir as mensagens formatadas.
+    - Vamos garantir que o `MarkdownView` seja eficiente e responsivo, utilizando técnicas de layout adequadas do JavaFX.
+    - O `MarkdownView` será projetado para ser reutilizável em outras partes do aplicativo, caso necessário.
+    - Vamos garantir que o `MarkdownView` seja facilmente integrável com o restante do sistema, mantendo a modularidade e a separação de responsabilidades.
+    - O `MarkdownView` será testado para garantir que renderize corretamente os diferentes tipos de Markdown e que se comporte bem em diferentes tamanhos de tela e resoluções.
+    - Vamos garantir que o `MarkdownView` seja compatível com as diretrizes de acessibilidade, permitindo que usuários com deficiências visuais possam interagir com o conteúdo renderizado.
+    - Vamos documentar o `MarkdownView` para que outros desenvolvedores possam entender como utilizá-lo e integrá-lo em seus próprios projetos.
+    - Vamos garantir que o `MarkdownView` seja facilmente extensível, permitindo que novos tipos de formatação possam ser adicionados no futuro sem grandes dificuldades.
+    - Vamos garantir que o `MarkdownView` seja testado em diferentes versões do JavaFX para garantir compatibilidade e estabilidade.
+    - Vamos garantir que o `MarkdownView` seja otimizado para desempenho, evitando renderizações desnecessárias e garantindo uma experiência fluida para o usuário.
+    - Vamos garantir que o `MarkdownView` seja facilmente configurável, permitindo que desenvolvedores possam personalizar seu comportamento e aparência conforme necessário.
+    - Vamos garantir que o `MarkdownView` seja integrado com o sistema de mensagens existente, permitindo que as mensagens enviadas e recebidas sejam renderizadas corretamente.
+    - Vamos garantir que o `MarkdownView` esteja pronto para externalizado em um repositório público, permitindo que outros desenvolvedores possam utilizá-lo em seus próprios projetos.
 
 ## Substituição
-- O Componente `MarkdownView` substituirá o WebView atual de exibição de mensagens na área de chat.
+    - O Componente `MarkdownView` substituirá o WebView atual de exibição de mensagens na área de chat.
 
 ## Informações Adicionais
-- Vamos explorar como poderíamos construir um sistema que leia Markdown e produza uma árvore de componentes JavaFX. Isso nos daria o controle total sobre a renderização e evitaria as complexidades de segurança do HTML.
-- Primeiro, precisamos entender a estrutura básica do Markdown. O Markdown funciona com uma sintaxe relativamente simples: cabeçalhos usam #, texto em negrito usa **, links usam [texto](url), e assim por diante. Podemos criar um parser que reconheça esses padrões e os converta diretamente em componentes JavaFX.
+    - Vamos explorar como poderíamos construir um sistema que leia Markdown e produza uma árvore de componentes JavaFX. Isso nos daria o controle total sobre a renderização e evitaria as complexidades de segurança do HTML.
+    - Primeiro, precisamos entender a estrutura básica do Markdown. O Markdown funciona com uma sintaxe relativamente simples: cabeçalhos usam #, texto em negrito usa **, links usam [texto](url), e assim por diante. Podemos criar um parser que reconheça esses padrões e os converta diretamente em componentes JavaFX.
 
 ## Aqui está um exemplo conceitual de como isso funcionaria:
-- Os exemplos abaixo são apenas para fins de demonstração e não devem ser usados diretamente no projeto. Eles ilustram como você poderia estruturar um renderizador Markdown em Kotlin usando JavaFX.
-- Vamos começar com um exemplo fundamental que demonstra como criar um renderizador Markdown básico em Kotlin:
+    - Os exemplos abaixo são apenas para fins de demonstração e não devem ser usados diretamente no projeto. Eles ilustram como você poderia estruturar um renderizador Markdown em Kotlin usando JavaFX.
+    - Vamos começar com um exemplo fundamental que demonstra como criar um renderizador Markdown básico em Kotlin:
 
 ```kotlin
 import javafx.scene.Node
@@ -128,7 +128,8 @@ class MarkdownRenderer {
 }
 ```
 ### Aprimorando com Recursos Avançados do Kotlin
-- Agora, vamos ver como podemos usar recursos mais avançados do Kotlin, como sealed classes e funções de extensão, para criar uma versão mais robusta e expressiva:
+    - Agora, vamos ver como podemos usar recursos mais avançados do Kotlin, como sealed classes e funções de extensão, para criar uma versão mais robusta e expressiva:
+
 ```kotlin
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -335,7 +336,8 @@ class AdvancedMarkdownRenderer {
 }
 ```
 ### Utilizando a Biblioteca CommonMark com Kotlin
-- Agora vamos ver como adaptar a biblioteca CommonMark para trabalhar mais elegantemente com Kotlin:
+    - Agora vamos ver como adaptar a biblioteca CommonMark para trabalhar mais elegantemente com Kotlin:
+
 ```kotlin
 import org.commonmark.parser.Parser
 import org.commonmark.node.*
@@ -488,7 +490,8 @@ class CommonMarkRenderer {
 }
 ```
 ### Exemplo de Uso Prático (APENAS REFEREÊNCIA, NÃO USAR NO PROJETO)
-- Vamos criar um exemplo que demonstra como usar esses renderizadores em uma aplicação JavaFX real:
+    - Vamos criar um exemplo que demonstra como usar esses renderizadores em uma aplicação JavaFX real:
+
 ```kotlin
 import javafx.application.Application
 import javafx.scene.Scene
@@ -538,5 +541,5 @@ fun main() {
 ```
 
 ## Reflexões sobre a Implementação em Kotlin
-- Observe como o Kotlin nos permitiu criar um código mais expressivo e menos propenso a erros. As sealed classes garantem que tratamos todos os casos possíveis, as funções de extensão nos permitem adicionar funcionalidades de forma natural, e o sistema de null safety reduz significativamente a possibilidade de NullPointerExceptions.
-- A abordagem funcional do Kotlin também nos permite pensar sobre o problema de forma diferente. Em vez de focar em loops e mutabilidade, podemos usar operações como map, filter, e fold para transformar dados de forma mais declarativa.
+    - Observe como o Kotlin nos permitiu criar um código mais expressivo e menos propenso a erros. As sealed classes garantem que tratamos todos os casos possíveis, as funções de extensão nos permitem adicionar funcionalidades de forma natural, e o sistema de null safety reduz significativamente a possibilidade de NullPointerExceptions.
+    - A abordagem funcional do Kotlin também nos permite pensar sobre o problema de forma diferente. Em vez de focar em loops e mutabilidade, podemos usar operações como map, filter, e fold para transformar dados de forma mais declarativa.
