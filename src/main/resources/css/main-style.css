@@ -375,6 +375,34 @@
     -fx-border-radius: 15px;
 }
 
+/* Estado de aviso da contagem de tokens (80% do limite) */
+.token-count-warning {
+    -fx-text-fill: #856404;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 10px;
+    -fx-background-color: #fff3cd;
+    -fx-background-radius: 15px;
+    -fx-border-color: #ffeaa7;
+    -fx-border-width: 2px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(243, 156, 18, 0.3), 4, 0, 0, 1);
+}
+
+/* Estado de limite excedido da contagem de tokens */
+.token-count-exceeded {
+    -fx-text-fill: #721c24;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 5px 10px;
+    -fx-background-color: #f8d7da;
+    -fx-background-radius: 15px;
+    -fx-border-color: #f5c6cb;
+    -fx-border-width: 2px;
+    -fx-border-radius: 15px;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.4), 4, 0, 0, 1);
+}
+
 /* Botão de sumarização */
 .summarize-btn {
     -fx-background-color: #9b59b6;

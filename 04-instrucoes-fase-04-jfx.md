@@ -2,11 +2,11 @@
     01 - Criação de uma nova funcionalidade para sumarização de conversa utilizando a API DeepSeek IA.
 
 ## Definições da nova funcionalidade
-    01 - Implementar uma funcionalidade de sumarização de conversa, onde o usuário pode solicitar um resumo da conversa atual. ⬜
-    02 - A sumarização deve ser feita utilizando a API DeepSeek IA, que já está integrada ao projeto. ⬜
-    03 - O resumo deve ser exibido em uma nova janela ou área de texto, permitindo ao usuário visualizar rapidamente os pontos principais da conversa. ⬜
-    04 - A funcionalidade deve ser acessível através de um botão na interface do usuário, que aciona a chamada à API para gerar o resumo. ⬜
-    05 - O resumo deve ser formatado de forma clara e legível, utilizando Markdown para destacar pontos importantes, se necessário. ⬜
+    01 - Implementar uma funcionalidade de sumarização de conversa, onde o usuário pode solicitar um resumo da conversa atual. ✅
+    02 - O resumo deve ser exibido em uma nova janela ou área de texto, permitindo ao usuário visualizar rapidamente os pontos principais da conversa. ✅
+    03 - A funcionalidade deve ser acessível através de um botão na interface do usuário, que aciona a chamada à API para gerar o resumo. ✅
+    05 - O resumo deve ser formatado de forma clara e legível, utilizando Markdown para destacar pontos importantes, se necessário. ✅
+    04 - A sumarização deve ser feita utilizando a API DeepSeek IA, que já está integrada ao projeto. ⬜
     06 - A implementação deve garantir que a sumarização não afete o desempenho da aplicação, utilizando chamadas assíncronas para a API. ⬜
     07 - A funcionalidade deve ser testada para garantir que o resumo gerado seja relevante e útil para o usuário, cobrindo os principais tópicos discutidos na conversa. ⬜
     08 - A interface deve permitir que o usuário visualize o resumo sem perder o contexto da conversa, mantendo a usabilidade e a fluidez da interação. 

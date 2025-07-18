@@ -74,7 +74,7 @@ class IntegratedMainController(
 
     // Variáveis para controle de tokens
     private var currentTokenCount: Int = 0
-    private val tokenLimit: Int = 32000 // Limite de tokens para DeepSeek
+    private val tokenLimit: Int = 128000 // Limite de tokens para DeepSeek (128k)
     private val tokenWarningThreshold: Int = (tokenLimit * 0.8).toInt() // 80% do limite
     private var currentSummary: String? = null
 
@@ -118,6 +118,39 @@ class IntegratedMainController(
                 event.consume()
                 sendMessage()
             }
+        }
+
+        // Adicionar listener para atualizar contagem de tokens em tempo real durante a digitação
+        messageInput.textProperty().addListener { _, _, newValue ->
+            updateInputTokenPreview(newValue)
+        }
+    }
+
+    private fun updateInputTokenPreview(inputText: String) {
+        if (inputText.isNotBlank()) {
+            val inputTokens = estimateTokens(inputText)
+            val totalTokensPreview = currentTokenCount + inputTokens
+
+            // Atualizar label com preview dos tokens
+            val previewText = "$currentTokenCount+$inputTokens/$tokenLimit"
+            tokenCountLabel.text = previewText
+
+            // Verificar se excederá o limite
+            if (totalTokensPreview >= tokenLimit) {
+                tokenCountLabel.styleClass.removeAll("token-count")
+                tokenCountLabel.styleClass.add("token-count-exceeded")
+            } else if (totalTokensPreview >= tokenWarningThreshold) {
+                tokenCountLabel.styleClass.removeAll("token-count", "token-count-exceeded")
+                tokenCountLabel.styleClass.add("token-count-warning")
+            } else {
+                tokenCountLabel.styleClass.removeAll("token-count-warning", "token-count-exceeded")
+                tokenCountLabel.styleClass.add("token-count")
+            }
+        } else {
+            // Voltar ao estado normal quando input estiver vazio
+            tokenCountLabel.text = "$currentTokenCount/$tokenLimit"
+            tokenCountLabel.styleClass.removeAll("token-count-warning", "token-count-exceeded")
+            tokenCountLabel.styleClass.add("token-count")
         }
     }
 
@@ -189,10 +222,21 @@ class IntegratedMainController(
 
     private fun displayMessages(messages: List<ChatMessage>) {
         messagesContainer.children.clear()
+
+        // Resetar contador de tokens ao carregar nova conversa
+        currentTokenCount = 0
+
         messages.forEach { message ->
             val messageBox = createMessageBox(message)
             messagesContainer.children.add(messageBox)
+
+            // Calcular tokens da mensagem carregada
+            val messageTokens = estimateTokens(message.content)
+            currentTokenCount += messageTokens
         }
+
+        // Atualizar a label de tokens após carregar todas as mensagens
+        updateTokenCountLabel()
 
         Platform.runLater {
             messageArea.vvalue = 1.0
