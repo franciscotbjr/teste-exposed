@@ -18,8 +18,8 @@
         10.3 - A mensagem de resumo deve ser diferenciada visualmente das mensagens normais, utilizando um estilo específico para destacar que é um resumo. ⬜
         10.4 - A mensagem de resumo deve conter um link ou botão que permita ao usuário iniciar uma nova conversa a partir daquele resumo, facilitando a continuidade da interação. ⬜
     11 - O aplicativo deverá ser capaz de calcular a quantidade de tokens utilizados na conversa, tanto para o usuário quanto para a IA, e exibir essa informação ao usuário. 
-        11.1 - A contagem de tokens deve ser feita antes de enviar a mensagem para a API DeepSeek IA, garantindo que o usuário esteja ciente do consumo de tokens. ⬜
-        11.2 - A contagem de tokens deve ser exibida de forma clara na interface, permitindo que o usuário veja quantos tokens foram utilizados na conversa atual. ⬜
+        11.1 - A contagem de tokens deve ser feita antes de enviar a mensagem para a API DeepSeek IA, garantindo que o usuário esteja ciente do consumo de tokens. ✅
+        11.2 - A contagem de tokens deve ser exibida de forma clara na interface, permitindo que o usuário veja quantos tokens foram utilizados na conversa atual. ✅
     12 - Quando a quantidade máxima de tokens estiver próxima do limite, o aplicativo deverá alertar o usuário, informando que a conversa está se aproximando do limite de tokens e sugerindo a sumarização da conversa. 
         12.1 - O alerta deve ser exibido de forma discreta, mas visível, para não interromper a experiência do usuário. ⬜
         12.2 - O alerta deve incluir um botão que permita ao usuário gerar um resumo da conversa atual imediatamente. ⬜

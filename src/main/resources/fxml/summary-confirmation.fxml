@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.hexasilith.presentation.controller.SummaryConfirmationController" styleClass="confirmation-modal" prefWidth="500.0" prefHeight="300.0">
+   <children>
+      <!-- Cabeçalho da confirmação -->
+      <HBox styleClass="confirmation-header" prefHeight="60.0">
+         <children>
+            <Label styleClass="confirmation-icon" text="❓" />
+            <Label styleClass="confirmation-title" text="Confirmar Sumarização" />
+            <Region HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
+
+      <!-- Conteúdo da mensagem -->
+      <VBox styleClass="confirmation-content" VBox.vgrow="ALWAYS" prefHeight="160.0">
+         <children>
+            <Label styleClass="confirmation-message" text="Deseja gerar um resumo da conversa atual?" wrapText="true" />
+            <Label fx:id="tokenInfoLabel" styleClass="confirmation-info" text="Esta ação irá processar todas as mensagens da conversa." wrapText="true" />
+            <Label styleClass="confirmation-warning" text="O resumo será gerado usando a API DeepSeek IA." wrapText="true" />
+         </children>
+      </VBox>
+
+      <!-- Botões de ação -->
+      <HBox styleClass="confirmation-buttons" prefHeight="80.0">
+         <children>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="cancelButton" styleClass="cancel-btn" text="Cancelar" prefWidth="120.0" prefHeight="40.0" />
+            <Button fx:id="confirmButton" styleClass="confirm-btn" text="Confirmar Sumarização" prefWidth="180.0" prefHeight="40.0" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

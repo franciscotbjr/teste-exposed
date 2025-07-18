@@ -405,6 +405,120 @@ class IntegratedMainController(
             return
         }
 
+        // Abrir modal de confirmação antes de processar a sumarização
+        showSummaryConfirmation(conversation)
+    }
+
+    private fun showSummaryConfirmation(conversation: ConversationItem) {
+        try {
+            // Criar modal de confirmação programaticamente (sem FXML)
+            val confirmationStage = Stage()
+            confirmationStage.title = "Confirmar Sumarização"
+            confirmationStage.initModality(Modality.APPLICATION_MODAL)
+            confirmationStage.initOwner(summarizeButton.scene.window)
+            confirmationStage.isResizable = false
+
+            // Criar layout principal
+            val rootVBox = VBox()
+            rootVBox.styleClass.add("confirmation-modal")
+            rootVBox.prefWidth = 500.0
+            rootVBox.prefHeight = 300.0
+
+            // Header
+            val headerHBox = HBox()
+            headerHBox.styleClass.add("confirmation-header")
+            headerHBox.prefHeight = 60.0
+            headerHBox.spacing = 15.0
+            headerHBox.padding = javafx.geometry.Insets(20.0)
+
+            val iconLabel = Label("❓")
+            iconLabel.styleClass.add("confirmation-icon")
+
+            val titleLabel = Label("Confirmar Sumarização")
+            titleLabel.styleClass.add("confirmation-title")
+
+            val headerSpacer = Region()
+            HBox.setHgrow(headerSpacer, javafx.scene.layout.Priority.ALWAYS)
+
+            headerHBox.children.addAll(iconLabel, titleLabel, headerSpacer)
+
+            // Content
+            val contentVBox = VBox()
+            contentVBox.styleClass.add("confirmation-content")
+            contentVBox.spacing = 12.0
+            contentVBox.padding = javafx.geometry.Insets(20.0)
+            VBox.setVgrow(contentVBox, javafx.scene.layout.Priority.ALWAYS)
+
+            val messageLabel = Label("Deseja gerar um resumo da conversa atual?")
+            messageLabel.styleClass.add("confirmation-message")
+            messageLabel.isWrapText = true
+
+            val percentage = (currentTokenCount.toDouble() / tokenLimit * 100).toInt()
+            val tokenInfoLabel = Label("Conversa atual: $currentTokenCount/$tokenLimit tokens ($percentage%)")
+            tokenInfoLabel.styleClass.add("confirmation-info")
+            tokenInfoLabel.isWrapText = true
+
+            val warningLabel = Label("O resumo será gerado usando a API DeepSeek IA.")
+            warningLabel.styleClass.add("confirmation-warning")
+            warningLabel.isWrapText = true
+
+            contentVBox.children.addAll(messageLabel, tokenInfoLabel, warningLabel)
+
+            // Buttons
+            val buttonsHBox = HBox()
+            buttonsHBox.styleClass.add("confirmation-buttons")
+            buttonsHBox.prefHeight = 80.0
+            buttonsHBox.spacing = 12.0
+            buttonsHBox.padding = javafx.geometry.Insets(15.0, 20.0, 15.0, 20.0)
+            buttonsHBox.alignment = javafx.geometry.Pos.CENTER_RIGHT
+
+            val buttonsSpacer = Region()
+            HBox.setHgrow(buttonsSpacer, javafx.scene.layout.Priority.ALWAYS)
+
+            val cancelButton = Button("Cancelar")
+            cancelButton.styleClass.add("cancel-btn")
+            cancelButton.prefWidth = 120.0
+            cancelButton.prefHeight = 40.0
+            cancelButton.isCancelButton = true
+
+            val confirmButton = Button("Confirmar Sumarização")
+            confirmButton.styleClass.add("confirm-btn")
+            confirmButton.prefWidth = 180.0
+            confirmButton.prefHeight = 40.0
+            confirmButton.isDefaultButton = true
+
+            buttonsHBox.children.addAll(buttonsSpacer, cancelButton, confirmButton)
+
+            // Adicionar tudo ao layout principal
+            rootVBox.children.addAll(headerHBox, contentVBox, buttonsHBox)
+
+            // Configurar ações dos botões
+            cancelButton.setOnAction {
+                println("Sumarização cancelada pelo usuário")
+                confirmationStage.close()
+            }
+
+            confirmButton.setOnAction {
+                confirmationStage.close()
+                processSummarization(conversation)
+            }
+
+            // Criar cena e aplicar estilos
+            val scene = Scene(rootVBox, 500.0, 300.0)
+            scene.stylesheets.add(javaClass.getResource("/css/main-style.css")?.toExternalForm())
+            confirmationStage.scene = scene
+
+            // Centralizar e exibir
+            confirmationStage.centerOnScreen()
+            confirmationStage.showAndWait()
+
+        } catch (e: Exception) {
+            showError("Erro ao abrir confirmação: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
+    private fun processSummarization(conversation: ConversationItem) {
         summarizeButton.isDisable = true
         alertSummarizeButton.isDisable = true
 
