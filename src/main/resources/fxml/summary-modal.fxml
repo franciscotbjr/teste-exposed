@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.hexasilith.presentation.controller.SummaryModalController" styleClass="summary-modal" prefWidth="800.0" prefHeight="600.0">
+   <children>
+      <!-- Cabeçalho da janela modal -->
+      <HBox styleClass="summary-modal-header">
+         <children>
+            <Label styleClass="summary-modal-title" text="📝 Resumo da Conversa" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="newConversationFromSummaryButton" styleClass="new-from-summary-btn" text="🆕 Nova Conversa" />
+            <Button fx:id="closeSummaryButton" styleClass="close-summary-btn" text="✕" />
+         </children>
+      </HBox>
+
+      <!-- Área de conteúdo do resumo -->
+      <ScrollPane fx:id="summaryScrollPane" styleClass="summary-modal-scroll" VBox.vgrow="ALWAYS">
+         <content>
+            <VBox fx:id="summaryContent" styleClass="summary-modal-content" />
+         </content>
+      </ScrollPane>
+
+      <!-- Rodapé com informações adicionais -->
+      <HBox styleClass="summary-modal-footer">
+         <children>
+            <Label fx:id="summaryInfoLabel" styleClass="summary-info" text="Resumo gerado automaticamente" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="copySummaryButton" styleClass="copy-summary-btn" text="📋 Copiar" />
+            <Button fx:id="exportSummaryButton" styleClass="export-summary-btn" text="💾 Exportar" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

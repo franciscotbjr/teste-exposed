@@ -24,6 +24,21 @@
             <HBox styleClass="chat-header">
                <children>
                   <Label styleClass="chat-title" text="DeepSeek AI Chat" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <!-- Contador de tokens -->
+                  <Label fx:id="tokenCountLabel" styleClass="token-count" text="Tokens: 0" />
+                  <!-- Botão de sumarização -->
+                  <Button fx:id="summarizeButton" styleClass="summarize-btn" text="📝 Resumir" />
+               </children>
+            </HBox>
+            <!-- Alerta de limite de tokens -->
+            <HBox fx:id="tokenLimitAlert" styleClass="token-alert" visible="false" managed="false">
+               <children>
+                  <Label styleClass="alert-icon" text="⚠️" />
+                  <Label fx:id="tokenAlertMessage" styleClass="alert-text" text="Conversa próxima do limite de tokens" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="alertSummarizeButton" styleClass="alert-summarize-btn" text="Resumir Agora" />
+                  <Button fx:id="dismissAlertButton" styleClass="dismiss-alert-btn" text="✕" />
                </children>
             </HBox>
             <ScrollPane fx:id="messageArea" fitToWidth="true" VBox.vgrow="ALWAYS">

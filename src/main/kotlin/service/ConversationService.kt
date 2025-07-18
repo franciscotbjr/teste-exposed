@@ -85,4 +85,43 @@ class ConversationService(
         val messages = messageRepository.findByConversationId(conversationId)
         return messages.lastOrNull()?.role == Role.USER
     }
+
+    suspend fun summarizeConversation(conversationId: UUID): String {
+        val messages = messageRepository.findByConversationId(conversationId)
+
+        if (messages.isEmpty()) {
+            return "Nenhuma mensagem encontrada para sumarizar."
+        }
+
+        // Por enquanto, vamos criar um resumo mockado
+        // Na implementação final, isso será substituído por uma chamada real à API de sumarização
+        val messageCount = messages.size
+        val userMessages = messages.count { it.role == Role.USER }
+        val aiMessages = messages.count { it.role == Role.ASSISTANT }
+
+        val firstUserMessage = messages.firstOrNull { it.role == Role.USER }?.content ?: "Sem mensagem inicial"
+        val lastMessage = messages.lastOrNull()?.content ?: "Sem mensagem final"
+
+        return """
+## 📝 Resumo da Conversa
+
+**Total de mensagens:** $messageCount
+**Mensagens do usuário:** $userMessages
+**Mensagens da IA:** $aiMessages
+
+### Primeira mensagem do usuário:
+${firstUserMessage.take(100)}${if (firstUserMessage.length > 100) "..." else ""}
+
+### Última mensagem:
+${lastMessage.take(100)}${if (lastMessage.length > 100) "..." else ""}
+
+### Resumo:
+Esta conversa contém uma interação entre o usuário e a IA DeepSeek. Os tópicos discutidos incluem várias questões e respostas relacionadas aos assuntos apresentados pelo usuário.
+
+### Recomendações:
+- Para continuar a discussão, considere criar uma nova conversa
+- Os pontos principais podem ser explorados com mais profundidade
+- Utilize este resumo como base para futuras interações
+        """.trimIndent()
+    }
 }
