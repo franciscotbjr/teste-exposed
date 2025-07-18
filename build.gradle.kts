@@ -62,6 +62,7 @@ dependencies {
     implementation("org.openjfx:javafx-fxml:${javafxVersion}")
     implementation("org.openjfx:javafx-base:${javafxVersion}")
     implementation("org.openjfx:javafx-graphics:${javafxVersion}")
+    implementation("org.openjfx:javafx-swing:${javafxVersion}")
 
     // Kotlinx Coroutines JavaFX
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-javafx:${coroutineVersion}")
@@ -72,6 +73,13 @@ dependencies {
     testImplementation("org.mockito:mockito-inline:${mockitoVersion}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${coroutinesTestVersion}")
     testImplementation("io.ktor:ktor-client-mock:${ktorMockVersion}")
+
+    // JavaFX Test dependencies
+    testImplementation("org.openjfx:javafx-controls:${javafxVersion}")
+    testImplementation("org.openjfx:javafx-fxml:${javafxVersion}")
+    testImplementation("org.openjfx:javafx-base:${javafxVersion}")
+    testImplementation("org.openjfx:javafx-graphics:${javafxVersion}")
+    testImplementation("org.openjfx:javafx-swing:${javafxVersion}")
 }
 
 javafx {
