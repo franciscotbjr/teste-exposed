@@ -17,6 +17,7 @@ import org.hexasilith.config.DatabaseConfig
 import org.hexasilith.presentation.controller.IntegratedMainController
 import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
+import org.hexasilith.repository.ConversationSummarizationRepository
 import org.hexasilith.repository.MessageRepository
 import org.hexasilith.service.AIService
 import org.hexasilith.service.ConversationService
@@ -49,11 +50,13 @@ class JavaFXApp : Application() {
         val conversationRepository = ConversationRepository(DatabaseConfig.database)
         val messageRepository = MessageRepository(DatabaseConfig.database)
         val apiRawResponseRepository = ApiRawResponseRepository(DatabaseConfig.database)
+        val conversationSummarizationRepository = ConversationSummarizationRepository(DatabaseConfig.database)
         val aiService = AIService(httpClient, AppConfig.apiKey)
         val conversationService = ConversationService(
             conversationRepository,
             messageRepository,
             apiRawResponseRepository,
+            conversationSummarizationRepository,
             aiService
         )
 

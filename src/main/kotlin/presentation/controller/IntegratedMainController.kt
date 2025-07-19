@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.javafx.JavaFx
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.hexasilith.model.ConversationSummarization
 import org.hexasilith.presentation.model.ChatMessage
 import org.hexasilith.presentation.model.ConversationItem
 import org.hexasilith.presentation.util.DataConverter
@@ -530,15 +531,18 @@ class IntegratedMainController(
                     alertSummarizeButton.text = "Resumindo..."
                 }
 
-                // Gerar resumo
-                val summary = withContext(Dispatchers.IO) {
-                    Thread.sleep(2000) // Simular delay de processamento
-                    conversationService.summarizeConversation(UUID.fromString(conversation.id))
+                // Gerar resumo usando o service
+                val conversationSummary = withContext(Dispatchers.IO) {
+                    conversationService.createConversationSummary(
+                        conversationId = UUID.fromString(conversation.id),
+                        tokensUsed = currentTokenCount,
+                        summaryMethod = "deepseek"
+                    )
                 }
 
                 Platform.runLater {
-                    currentSummary = summary
-                    openSummaryModal(summary, conversation)
+                    currentSummary = conversationSummary.summary
+                    openSummaryModal(conversationSummary, conversation)
 
                     // Ocultar alerta se estiver visível
                     dismissTokenLimitAlert()
@@ -558,7 +562,7 @@ class IntegratedMainController(
         }
     }
 
-    private fun openSummaryModal(summary: String, conversation: ConversationItem) {
+    private fun openSummaryModal(conversationSummary: ConversationSummarization, conversation: ConversationItem) {
         try {
             val fxmlLoader = FXMLLoader(javaClass.getResource("/fxml/summary-modal.fxml"))
             val modalRoot: Parent = fxmlLoader.load()
@@ -578,8 +582,10 @@ class IntegratedMainController(
 
             controller.setModalStage(modalStage)
             controller.setSummaryContent(
-                summary,
-                "Conversa: ${conversation.title} | Última atualização: ${conversation.lastMessageTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}"
+                summary = conversationSummary.summary,
+                conversationInfo = "Conversa: ${conversation.title} | Última atualização: ${conversation.lastMessageTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}",
+                tokensUsed = conversationSummary.tokensUsed,
+                summaryMethod = conversationSummary.summaryMethod
             )
 
             controller.setOnNewConversationCallback {

@@ -7,6 +7,7 @@ import org.hexasilith.model.*
 import org.hexasilith.repository.ConversationRepository
 import org.hexasilith.repository.MessageRepository
 import org.hexasilith.repository.ApiRawResponseRepository
+import org.hexasilith.repository.ConversationSummarizationRepository
 import org.hexasilith.service.AIService
 import org.hexasilith.service.ConversationService
 import org.jetbrains.exposed.sql.Database
@@ -30,6 +31,7 @@ class ConversationServiceTest {
     private lateinit var conversationRepository: ConversationRepository
     private lateinit var messageRepository: MessageRepository
     private lateinit var apiRawResponseRepository: ApiRawResponseRepository
+    private lateinit var conversationSummarizationRepository: ConversationSummarizationRepository
     private lateinit var aiService: AIService
     private lateinit var conversationService: ConversationService
 
@@ -47,8 +49,8 @@ class ConversationServiceTest {
         database = Database.connect(dataSource)
         
         transaction(database) {
-            SchemaUtils.create(Roles, Conversations, Messages, ApiRawResponses)
-            
+            SchemaUtils.create(Roles, Conversations, Messages, ApiRawResponses, ConversationsSummarizations)
+
             // Inserir roles necessários
             Roles.insert {
                 it[name] = "SYSTEM"
@@ -67,11 +69,13 @@ class ConversationServiceTest {
         conversationRepository = ConversationRepository(database)
         messageRepository = MessageRepository(database)
         apiRawResponseRepository = ApiRawResponseRepository(database)
+        conversationSummarizationRepository = ConversationSummarizationRepository(database)
     }
 
     @BeforeEach
     fun cleanDatabase() {
         transaction(database) {
+            ConversationsSummarizations.deleteAll()
             ApiRawResponses.deleteAll()
             Messages.deleteAll()
             Conversations.deleteAll()
@@ -83,6 +87,7 @@ class ConversationServiceTest {
             conversationRepository,
             messageRepository,
             apiRawResponseRepository,
+            conversationSummarizationRepository,
             aiService
         )
         

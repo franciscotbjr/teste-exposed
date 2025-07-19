@@ -17,6 +17,7 @@ import org.hexasilith.controller.ChatController
 import org.hexasilith.presentation.JavaFXApp
 import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
+import org.hexasilith.repository.ConversationSummarizationRepository
 import org.hexasilith.repository.MessageRepository
 import org.hexasilith.service.AIService
 import org.hexasilith.service.ConversationService
@@ -71,10 +72,12 @@ private suspend fun startConsoleApp() {
 
     // Incializa ConversationService
     val aiService = AIService(httpClient, AppConfig.apiKey)
+    val conversationSummarizationRepository = ConversationSummarizationRepository(DatabaseConfig.database)
     val conversationService = ConversationService(
         conversationRepository,
         messageRepository,
         apiRawResponseRepository,
+        conversationSummarizationRepository,
         aiService
     )
 

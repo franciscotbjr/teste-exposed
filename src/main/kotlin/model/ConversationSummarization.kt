@@ -9,6 +9,9 @@ data class ConversationSummarization (
     val originConversationId: UUID, // Referente à conversa que foi sumarizada
     val destinyConversationId: UUID?, // Quando uma nova conversa é criada a partir da sumarização, este campo será preenchido
     val summary: String, // A sumarização da conversa que foi feita
+    val tokensUsed: Int = 0, // Total de tokens utilizados na sumarização
+    val summaryMethod: String = "deepseek", // Tipo de sumarização (ex: "deepseek", "auto", etc.)
+    val isActive: Boolean = true, // Para permitir marcar resumos como inativos sem deletar
     val createdAt: LocalDateTime = LocalDateTime.now(),
     val updatedAt: LocalDateTime = LocalDateTime.now() // Data de atualização da sumarização quando uma nova conversa é criada a partir dela
 )

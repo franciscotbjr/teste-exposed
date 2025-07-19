@@ -13,6 +13,9 @@ object ConversationsSummarizations: Table("conversations_summarizations") {
     val originConversationId = varchar("origin_conversation_id", 36).references(Conversations.id, onDelete = ReferenceOption.NO_ACTION)
     val destinyConversationId = varchar("destiny_conversation_id", 36).references(Conversations.id, onDelete = ReferenceOption.NO_ACTION).nullable()
     val summary = text("summary")
+    val tokensUsed = integer("tokens_used").default(0)
+    val summaryMethod = varchar("summary_method", 50).default("deepseek")
+    val isActive = bool("is_active").default(true)
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 

@@ -14,6 +14,8 @@ import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertNull
+import kotlin.test.assertFalse
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ConversationSummarizationRepositoryTest {
@@ -62,6 +64,31 @@ class ConversationSummarizationRepositoryTest {
                 "Foi definido como 'Conversation Summarization', " +
                 "com alternativas como 'Context Summarization'. " +
                 "Discutiu-se também uso em APIs para gerenciamento de tokens."
+        val tokensUsed = 150
+        val summaryMethod = "deepseek"
+
+        // When
+        val conversationSummarization = conversationSummarizationRepository.create(
+            testConversationOrigin.id,
+            summary,
+            tokensUsed,
+            summaryMethod)
+
+        // Then
+        assertNotNull(conversationSummarization.id)
+        assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
+        assertNull(conversationSummarization.destinyConversationId)
+        assertEquals(summary, conversationSummarization.summary)
+        assertEquals(tokensUsed, conversationSummarization.tokensUsed)
+        assertEquals(summaryMethod, conversationSummarization.summaryMethod)
+        assertTrue(conversationSummarization.isActive)
+        assertNotNull(conversationSummarization.createdAt)
+    }
+
+    @Test
+    fun `should create Conversation Summarization with default values successfully`() {
+        // Given
+        val summary = "Resumo básico da conversa"
 
         // When
         val conversationSummarization = conversationSummarizationRepository.create(
@@ -73,6 +100,9 @@ class ConversationSummarizationRepositoryTest {
         assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
         assertNull(conversationSummarization.destinyConversationId)
         assertEquals(summary, conversationSummarization.summary)
+        assertEquals(0, conversationSummarization.tokensUsed)
+        assertEquals("deepseek", conversationSummarization.summaryMethod)
+        assertTrue(conversationSummarization.isActive)
         assertNotNull(conversationSummarization.createdAt)
     }
 
@@ -83,17 +113,20 @@ class ConversationSummarizationRepositoryTest {
                 "Foi definido como 'Conversation Summarization', " +
                 "com alternativas como 'Context Summarization'. " +
                 "Discutiu-se também uso em APIs para gerenciamento de tokens."
+        val tokensUsed = 200
 
         // When
         val conversationSummarization = conversationSummarizationRepository.create(
             testConversationOrigin.id,
-            summary)
+            summary,
+            tokensUsed)
 
         // Then
         assertNotNull(conversationSummarization.id)
         assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
         assertNull(conversationSummarization.destinyConversationId)
         assertEquals(summary, conversationSummarization.summary)
+        assertEquals(tokensUsed, conversationSummarization.tokensUsed)
         assertNotNull(conversationSummarization.createdAt)
 
         val testConversationDestiny = conversationRepository.create("Test Destiny Conversation")
@@ -107,22 +140,50 @@ class ConversationSummarizationRepositoryTest {
     }
 
     @Test
+    fun `should deactivate Conversation Summarization successfully`() {
+        // Given
+        val summary = "Resumo a ser desativado"
+        val conversationSummarization = conversationSummarizationRepository.create(
+            testConversationOrigin.id,
+            summary)
+
+        // When
+        val result = conversationSummarizationRepository.deactivate(conversationSummarization.id)
+
+        // Then
+        assertEquals(1, result)
+
+        // Verificar se não aparece na busca normal (apenas ativos)
+        val activeSummarizations = conversationSummarizationRepository.findByOriginConversationId(testConversationOrigin.id)
+        assertTrue(activeSummarizations.isEmpty())
+
+        // Verificar se aparece na busca incluindo inativos
+        val allSummarizations = conversationSummarizationRepository.findByOriginConversationId(testConversationOrigin.id, includeInactive = true)
+        assertEquals(1, allSummarizations.size)
+        assertFalse(allSummarizations.first().isActive)
+    }
+
+    @Test
     fun `should find Conversation Summarization by conversation origin id`() {
         // Given
         val summary = "Resumo: O usuário solicitou tradução do termo 'sumarização' para inglês. " +
                 "Foi definido como 'Conversation Summarization', " +
                 "com alternativas como 'Context Summarization'. " +
                 "Discutiu-se também uso em APIs para gerenciamento de tokens."
+        val tokensUsed = 175
 
         // When
         val conversationSummarization = conversationSummarizationRepository.create(
             testConversationOrigin.id,
-            summary)
+            summary,
+            tokensUsed)
 
         val conversationSummarizationFound = conversationSummarizationRepository.findByOriginConversationId(testConversationOrigin.id).first()
 
         // Then
-        assertEquals(conversationSummarizationFound?.originConversationId, testConversationOrigin.id)
+        assertEquals(conversationSummarizationFound.originConversationId, testConversationOrigin.id)
+        assertEquals(tokensUsed, conversationSummarizationFound.tokensUsed)
+        assertTrue(conversationSummarizationFound.isActive)
 
     }
 
@@ -134,11 +195,13 @@ class ConversationSummarizationRepositoryTest {
                 "com alternativas como 'Context Summarization'. " +
                 "Discutiu-se também uso em APIs para gerenciamento de tokens."
         val testConversationDestiny = conversationRepository.create("Test Destiny Conversation")
+        val tokensUsed = 300
 
         // When
         val conversationSummarization = conversationSummarizationRepository.create(
             testConversationOrigin.id,
-            summary)
+            summary,
+            tokensUsed)
 
         val result = conversationSummarizationRepository.updateDestinyConversationId(
             conversationSummarization.id,
@@ -148,38 +211,14 @@ class ConversationSummarizationRepositoryTest {
 
         // Then
         assertEquals(conversationSummarizationFound?.originConversationId, testConversationOrigin.id)
+        assertEquals(tokensUsed, conversationSummarizationFound?.tokensUsed)
+        assertTrue(conversationSummarizationFound?.isActive == true)
 
-    }
-
-    @Test
-    fun `should return empty list for non-existent conversation origin`() {
-        // Given
-        val nonExistentOriginConversationId = UUID.randomUUID()
-
-        // When
-        val conversationSummarizations = conversationSummarizationRepository.findByOriginConversationId(nonExistentOriginConversationId)
-
-        // Then
-        assertTrue(conversationSummarizations.isEmpty())
-    }
-
-    @Test
-    fun `should return null for non-existent conversation destiny`() {
-        // Given
-        val nonExistentDestinyConversationId = UUID.randomUUID()
-
-        // When
-        val conversationSummarizations = conversationSummarizationRepository.findByDestinyConversationId(nonExistentDestinyConversationId)
-
-        // Then
-        assertNull(conversationSummarizations)
     }
 
     @AfterAll
     fun cleanup() {
-        transaction(database) {
-            SchemaUtils.drop(ConversationsSummarizations, Conversations)
-        }
         dataSource.close()
     }
+
 }

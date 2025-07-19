@@ -13,6 +13,7 @@ import org.hexasilith.config.AppConfig
 import org.hexasilith.config.DatabaseConfig
 import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
+import org.hexasilith.repository.ConversationSummarizationRepository
 import org.hexasilith.repository.MessageRepository
 import org.hexasilith.service.AIService
 import org.hexasilith.service.ConversationService
@@ -42,12 +43,14 @@ object Dependencies {
     val conversationRepository by lazy { ConversationRepository(DatabaseConfig.database) }
     val messageRepository by lazy { MessageRepository(DatabaseConfig.database) }
     val apiRawResponseRepository by lazy { ApiRawResponseRepository(DatabaseConfig.database) }
+    val conversationSummarizationRepository by lazy { ConversationSummarizationRepository(DatabaseConfig.database) }
     val aiService by lazy { AIService(httpClient, AppConfig.apiKey) }
     val conversationService by lazy {
         ConversationService(
             conversationRepository,
             messageRepository,
             apiRawResponseRepository,
+            conversationSummarizationRepository,
             aiService
         )
     }

@@ -38,6 +38,8 @@ class SummaryModalController {
     private lateinit var exportSummaryButton: Button
 
     private var summaryText: String = ""
+    private var tokensUsed: Int = 0
+    private var summaryMethod: String = "deepseek"
     private var onNewConversationCallback: (() -> Unit)? = null
     private lateinit var modalStage: Stage
 
@@ -56,8 +58,15 @@ class SummaryModalController {
         this.modalStage = stage
     }
 
-    fun setSummaryContent(summary: String, conversationInfo: String = "") {
+    fun setSummaryContent(
+        summary: String,
+        conversationInfo: String = "",
+        tokensUsed: Int = 0,
+        summaryMethod: String = "deepseek"
+    ) {
         this.summaryText = summary
+        this.tokensUsed = tokensUsed
+        this.summaryMethod = summaryMethod
 
         Platform.runLater {
             summaryContent.children.clear()
@@ -70,7 +79,9 @@ class SummaryModalController {
             summaryContent.children.add(markdownView)
 
             if (conversationInfo.isNotEmpty()) {
-                summaryInfoLabel.text = conversationInfo
+                summaryInfoLabel.text = "$conversationInfo • Tokens: $tokensUsed • Método: $summaryMethod"
+            } else {
+                summaryInfoLabel.text = "Tokens utilizados: $tokensUsed • Método: $summaryMethod"
             }
 
             // Scroll para o topo

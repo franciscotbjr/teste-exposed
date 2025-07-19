@@ -4,6 +4,7 @@ import org.hexasilith.model.ConversationSummarization
 import org.hexasilith.model.ConversationsSummarizations
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -15,11 +16,17 @@ class ConversationSummarizationRepository(private val database: Database) {
 
     fun create(
         originConversationId: UUID,
-        summary: String): ConversationSummarization = transaction(database) {
+        summary: String,
+        tokensUsed: Int = 0,
+        summaryMethod: String = "deepseek"
+    ): ConversationSummarization = transaction(database) {
         ConversationsSummarizations.insert {
             it[this.id] = UUID.randomUUID().toString()
             it[this.originConversationId] = originConversationId.toString()
             it[this.summary] = summary
+            it[this.tokensUsed] = tokensUsed
+            it[this.summaryMethod] = summaryMethod
+            it[this.isActive] = true
             it[this.createdAt] = LocalDateTime.now()
         }.let {
             ConversationSummarization(
@@ -27,6 +34,9 @@ class ConversationSummarizationRepository(private val database: Database) {
                 originConversationId = UUID.fromString(it[ConversationsSummarizations.originConversationId]),
                 destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
                 summary = it[ConversationsSummarizations.summary],
+                tokensUsed = it[ConversationsSummarizations.tokensUsed],
+                summaryMethod = it[ConversationsSummarizations.summaryMethod],
+                isActive = it[ConversationsSummarizations.isActive],
                 createdAt = it[ConversationsSummarizations.createdAt]
             )
         }
@@ -42,16 +52,35 @@ class ConversationSummarizationRepository(private val database: Database) {
         }
     }
 
-    fun findByOriginConversationId(originConversationId: UUID): List<ConversationSummarization> = transaction(database) {
-        ConversationsSummarizations.selectAll()
-            .where { ConversationsSummarizations.originConversationId eq originConversationId.toString() }
-            .orderBy(ConversationsSummarizations.updatedAt to SortOrder.ASC)
+    fun deactivate(summarizationId: UUID): Int = transaction(database) {
+        ConversationsSummarizations.update({ ConversationsSummarizations.id eq summarizationId.toString() }) {
+            it[this.isActive] = false
+            it[this.updatedAt] = LocalDateTime.now()
+        }
+    }
+
+    fun findByOriginConversationId(originConversationId: UUID, includeInactive: Boolean = false): List<ConversationSummarization> = transaction(database) {
+        val query = if (includeInactive) {
+            ConversationsSummarizations.selectAll()
+                .where { ConversationsSummarizations.originConversationId eq originConversationId.toString() }
+        } else {
+            ConversationsSummarizations.selectAll()
+                .where {
+                    (ConversationsSummarizations.originConversationId eq originConversationId.toString()) and
+                    (ConversationsSummarizations.isActive eq true)
+                }
+        }
+
+        query.orderBy(ConversationsSummarizations.updatedAt to SortOrder.ASC)
             .map {
                 ConversationSummarization(
                     UUID.fromString(it[ConversationsSummarizations.id]),
                     UUID.fromString(it[ConversationsSummarizations.originConversationId]),
                     destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
                     it[ConversationsSummarizations.summary],
+                    it[ConversationsSummarizations.tokensUsed],
+                    it[ConversationsSummarizations.summaryMethod],
+                    it[ConversationsSummarizations.isActive],
                     it[ConversationsSummarizations.createdAt],
                     it[ConversationsSummarizations.updatedAt]
                 )
@@ -68,6 +97,9 @@ class ConversationSummarizationRepository(private val database: Database) {
                     UUID.fromString(it[ConversationsSummarizations.originConversationId]),
                     destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
                     it[ConversationsSummarizations.summary],
+                    it[ConversationsSummarizations.tokensUsed],
+                    it[ConversationsSummarizations.summaryMethod],
+                    it[ConversationsSummarizations.isActive],
                     it[ConversationsSummarizations.createdAt],
                     it[ConversationsSummarizations.updatedAt]
                 )
@@ -75,5 +107,3 @@ class ConversationSummarizationRepository(private val database: Database) {
     }
 
 }
-
-

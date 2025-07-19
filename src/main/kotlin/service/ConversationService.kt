@@ -1,10 +1,12 @@
 package org.hexasilith.service
 
 import org.hexasilith.model.Conversation
+import org.hexasilith.model.ConversationSummarization
 import org.hexasilith.model.Message
 import org.hexasilith.model.Role
 import org.hexasilith.repository.ApiRawResponseRepository
 import org.hexasilith.repository.ConversationRepository
+import org.hexasilith.repository.ConversationSummarizationRepository
 import org.hexasilith.repository.MessageRepository
 import java.util.UUID
 
@@ -12,6 +14,7 @@ class ConversationService(
     private val conversationRepository: ConversationRepository,
     private val messageRepository: MessageRepository,
     private val apiRawResponseRepository: ApiRawResponseRepository,
+    private val conversationSummarizationRepository: ConversationSummarizationRepository,
     private val aiService: AIService
 ) {
     fun createConversation(title: String): Conversation {
@@ -99,29 +102,69 @@ class ConversationService(
         val userMessages = messages.count { it.role == Role.USER }
         val aiMessages = messages.count { it.role == Role.ASSISTANT }
 
-        val firstUserMessage = messages.firstOrNull { it.role == Role.USER }?.content ?: "Sem mensagem inicial"
-        val lastMessage = messages.lastOrNull()?.content ?: "Sem mensagem final"
+        // Simular resumo gerado
+        val summary = """
+## Resumo da Conversa
 
-        return """
-## 📝 Resumo da Conversa
+**Estatísticas:**
+- Total de mensagens: $messageCount
+- Mensagens do usuário: $userMessages  
+- Respostas da IA: $aiMessages
 
-**Total de mensagens:** $messageCount
-**Mensagens do usuário:** $userMessages
-**Mensagens da IA:** $aiMessages
+**Resumo do conteúdo:**
+${if (messages.isNotEmpty()) {
+    val firstUserMessage = messages.firstOrNull { it.role == Role.USER }?.content ?: ""
+    val lastUserMessage = messages.lastOrNull { it.role == Role.USER }?.content ?: ""
+    
+    "A conversa iniciou com: \"${firstUserMessage.take(100)}...\"\n" +
+    if (firstUserMessage != lastUserMessage) {
+        "E a última interação foi sobre: \"${lastUserMessage.take(100)}...\"\n"
+    } else ""
+} else "Não há mensagens para resumir."}
 
-### Primeira mensagem do usuário:
-${firstUserMessage.take(100)}${if (firstUserMessage.length > 100) "..." else ""}
-
-### Última mensagem:
-${lastMessage.take(100)}${if (lastMessage.length > 100) "..." else ""}
-
-### Resumo:
-Esta conversa contém uma interação entre o usuário e a IA DeepSeek. Os tópicos discutidos incluem várias questões e respostas relacionadas aos assuntos apresentados pelo usuário.
-
-### Recomendações:
-- Para continuar a discussão, considere criar uma nova conversa
-- Os pontos principais podem ser explorados com mais profundidade
-- Utilize este resumo como base para futuras interações
+**Tópicos principais discutidos:**
+- Interação com IA conversacional
+- ${messageCount} trocas de mensagens realizadas
+- Conversa ${if (messageCount > 10) "extensa" else "concisa"} com múltiplos pontos abordados
         """.trimIndent()
+
+        return summary
+    }
+
+    suspend fun createConversationSummary(
+        conversationId: UUID,
+        tokensUsed: Int = 0,
+        summaryMethod: String = "deepseek"
+    ): ConversationSummarization {
+        // Gerar o resumo
+        val summary = summarizeConversation(conversationId)
+
+        // Persistir a sumarização
+        return conversationSummarizationRepository.create(
+            originConversationId = conversationId,
+            summary = summary,
+            tokensUsed = tokensUsed,
+            summaryMethod = summaryMethod
+        )
+    }
+
+    fun getConversationSummaries(conversationId: UUID, includeInactive: Boolean = false): List<ConversationSummarization> {
+        return conversationSummarizationRepository.findByOriginConversationId(conversationId, includeInactive)
+    }
+
+    fun updateSummaryDestinyConversation(summaryId: UUID, destinyConversationId: UUID): Boolean {
+        return try {
+            conversationSummarizationRepository.updateDestinyConversationId(summaryId, destinyConversationId) > 0
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun deactivateConversationSummary(summaryId: UUID): Boolean {
+        return try {
+            conversationSummarizationRepository.deactivate(summaryId) > 0
+        } catch (e: Exception) {
+            false
+        }
     }
 }
