@@ -1,33 +1,45 @@
 # HexaSilith Chat
 
-Uma aplicação de chat com inteligência artificial desenvolvida em Kotlin que utiliza a API da DeepSeek para conversas interativas via linha de comando.
+Uma aplicação de chat com inteligência artificial desenvolvida em Kotlin que utiliza a API da DeepSeek para conversas interativas. O projeto oferece tanto interface de linha de comando (CLI) quanto interface gráfica (GUI) com JavaFX, incluindo funcionalidades avançadas de sumarização de conversas.
 
 ## ✨ Características
 
 - 🤖 **Integração com IA**: Conversas inteligentes usando a API DeepSeek
-- 💾 **Persistência de dados**: Armazenamento local de conversas usando SQLite
-- 🎨 **Interface colorida**: Terminal com cores usando ANSI/Jansi
-- 📝 **Gestão de conversas**: Criar, listar, carregar e navegar entre conversas
-- 🏗️ **Arquitetura limpa**: Separação clara entre camadas (controller, service, repository, model)
-- 🗄️ **Migrações automáticas**: Gerenciamento de schema com Flyway
+- 🖥️ **Interface Dupla**: CLI e GUI (JavaFX) com experiências completas
+- 📝 **Sumarização de Conversas**: Geração automática de resumos com persistência
+- 🎯 **Gerenciamento de Tokens**: Contagem em tempo real e alertas de limite
+- 💾 **Persistência Avançada**: Armazenamento completo incluindo sumarizações
+- 🎨 **Interface Moderna**: JavaFX com suporte a Markdown e design responsivo
+- 📊 **Histórico Completo**: Visualização e navegação entre conversas
+- 🏗️ **Arquitetura Limpa**: Separação em camadas (Controller → Service → Repository)
+- 🗄️ **Migrações Automáticas**: Gerenciamento completo de schema com Flyway
 
 ## 🛠️ Tecnologias Utilizadas
 
+### Backend e Core
 - **Kotlin** - Linguagem principal
 - **Exposed** - ORM para Kotlin
 - **SQLite** - Banco de dados local
-- **Flyway** - Gerenciamento de migrações de banco de dados
-- **Ktor Client** - Cliente HTTP para requisições à API
-- **Jansi** - Cores e formatação no terminal
-- **HikariCP** - Pool de conexões de banco de dados
-- **Typesafe Config** - Gerenciamento de configurações
+- **Flyway** - Gerenciamento de migrações
+- **HikariCP** - Pool de conexões
+
+### Interface e Comunicação
+- **JavaFX** - Interface gráfica moderna
+- **Ktor Client** - Cliente HTTP para API
 - **Kotlinx Serialization** - Serialização JSON
+- **Jansi** - Cores no terminal (CLI)
+
+### Configuração e Utilitários
+- **Typesafe Config** - Gerenciamento de configurações
+- **JUnit 5** - Framework de testes
+- **Markdown Parser** - Renderização de texto formatado
 
 ## 📋 Pré-requisitos
 
-- Java 11 ou superior
-- Kotlin 1.9+
+- Java 21 ou superior
+- Kotlin 2.1+
 - Chave de API da DeepSeek
+- JavaFX (incluído nas dependências)
 
 ## ⚙️ Configuração
 
@@ -56,31 +68,64 @@ Uma aplicação de chat com inteligência artificial desenvolvida em Kotlin que 
 
 ## 🚀 Execução
 
-### Via IDE
-Execute a função `main` no arquivo `Main.kt`
-
-### Via linha de comando
+### Interface Gráfica (GUI) - Padrão
 ```bash
 ./gradlew run
 ```
 
-**Nota**: Na primeira execução, o Flyway executará automaticamente as migrações necessárias para criar o schema do banco de dados.
+### Interface de Linha de Comando (CLI)
+```bash
+./gradlew run --args="cli"
+```
+
+### Via IDE
+Execute a função `main` no arquivo `Main.kt`
+
+**Nota**: Na primeira execução, o Flyway executará automaticamente as migrações necessárias para criar o schema completo do banco de dados.
 
 ## 📖 Como Usar
 
-Ao iniciar a aplicação, você verá o banner do HexaSilith Chat e as opções disponíveis:
+### 🖥️ Interface Gráfica (JavaFX)
 
-### Comandos Disponíveis
+A interface gráfica oferece uma experiência moderna e intuitiva:
 
-- **Enviar mensagem**: Digite diretamente sua mensagem e pressione Enter
+#### Funcionalidades Principais:
+- **📝 Chat Interativo**: Envio e recebimento de mensagens com a IA
+- **📋 Lista de Conversas**: Navegação entre conversas salvas
+- **🔄 Sumarização**: Geração de resumos das conversas atuais
+- **📊 Contagem de Tokens**: Monitoramento em tempo real do uso de tokens
+- **🎨 Suporte a Markdown**: Renderização completa de texto formatado
+- **💾 Histórico Completo**: Visualização de todas as mensagens e resumos
+
+#### Interface de Sumarização:
+1. **Botão "Resumir"**: Disponível na interface principal
+2. **Modal de Confirmação**: Confirma antes de gerar o resumo
+3. **Processamento**: Indicador visual durante a geração
+4. **Exibição do Resultado**: Modal dedicado com:
+   - Resumo formatado em Markdown
+   - Informações de tokens utilizados
+   - Método de sumarização usado
+   - Opções para copiar ou criar nova conversa
+
+#### Gerenciamento de Tokens:
+- **Contagem em Tempo Real**: Exibida durante a digitação
+- **Sistema de Alertas**: Cores visuais indicando proximidade do limite
+- **Limite Configurado**: 128k tokens (limite da API DeepSeek)
+- **Threshold de Aviso**: Alerta quando atinge 80% do limite
+
+### 💻 Interface de Linha de Comando (CLI)
+
+Ao iniciar a aplicação CLI, você verá o banner do HexaSilith Chat e as opções:
+
+#### Comandos Disponíveis:
+- **Enviar mensagem**: Digite diretamente e pressione Enter
 - `/new` - Criar uma nova conversa
 - `/list` - Listar todas as conversas salvas
 - `/load <id>` - Carregar uma conversa específica pelo ID
-- `/delete <id>` - Excluir uma conversa (funcionalidade em desenvolvimento)
+- `/delete <id>` - Excluir uma conversa
 - `/exit` - Sair da aplicação
 
-### Exemplo de Uso
-
+#### Exemplo de Uso:
 ```
 > Olá, como você pode me ajudar?
 AI: Olá! Eu posso ajudá-lo com diversas tarefas...
@@ -97,95 +142,209 @@ AI: Olá! Eu posso ajudá-lo com diversas tarefas...
 
 ## 🏗️ Arquitetura
 
-O projeto segue uma arquitetura em camadas bem definida:
+O projeto segue uma arquitetura em camadas bem definida com separação clara de responsabilidades:
 
 ```
 src/main/kotlin/
-├── config/           # Configurações da aplicação
+├── config/                    # Configurações da aplicação
 │   ├── AppConfig.kt
-│   └── DatabaseConfig.kt (com integração Flyway)
-├── controller/       # Controladores da aplicação
-│   └── ChatController.kt
-├── model/           # Modelos de dados e tabelas
-│   ├── Conversation.kt
-│   ├── Conversations.kt
-│   ├── Message.kt
-│   ├── Messages.kt
-│   ├── Role.kt
-│   ├── Roles.kt
-│   ├── ApiRawResponse.kt
-│   └── ApiRawResponses.kt
-├── repository/      # Camada de acesso a dados
+│   └── DatabaseConfig.kt     # Integração Flyway + HikariCP
+├── controller/               # Controladores da aplicação
+│   └── ChatController.kt     # CLI Controller
+├── presentation/             # Camada de apresentação JavaFX
+│   ├── JavaFXApp.kt         # Aplicação principal JavaFX
+│   ├── controller/          # Controllers JavaFX
+│   │   ├── IntegratedMainController.kt
+│   │   ├── SummaryModalController.kt
+│   │   └── SummaryConfirmationController.kt
+│   ├── component/           # Componentes reutilizáveis
+│   │   ├── MarkdownParser.kt
+│   │   └── MarkdownView.kt
+│   └── service/             # Serviços da apresentação
+│       └── MockChatService.kt
+├── model/                   # Modelos de dados e tabelas Exposed
+│   ├── Conversation.kt / Conversations.kt
+│   ├── Message.kt / Messages.kt
+│   ├── Role.kt / Roles.kt
+│   ├── ApiRawResponse.kt / ApiRawResponses.kt
+│   └── ConversationSummarization.kt / ConversationsSummarizations.kt
+├── repository/              # Camada de acesso a dados
 │   ├── ConversationRepository.kt
 │   ├── MessageRepository.kt
-│   └── ApiRawResponseRepository.kt
-├── service/         # Lógica de negócio
-│   ├── ConversationService.kt
-│   └── AIService.kt
-├── util/            # Utilitários
+│   ├── ApiRawResponseRepository.kt
+│   └── ConversationSummarizationRepository.kt  # ✅ NOVO
+├── service/                 # Lógica de negócio
+│   ├── ConversationService.kt  # Serviço principal
+│   └── AIService.kt           # Integração com API
+├── util/                    # Utilitários
 │   ├── ConsolePrinter.kt
 │   └── InputReader.kt
-└── Main.kt          # Ponto de entrada da aplicação
+└── Main.kt                  # Ponto de entrada
 
 src/main/resources/
-└── db/migration/    # Scripts de migração Flyway
-    └── V1__Create_roles_table.sql
+├── db/migration/            # Scripts Flyway
+│   ├── V1__Create_roles_table.sql
+│   ├── V2__Create_conversations_table.sql
+│   ├── V3__Create_messages_table.sql
+│   ├── V4__Create_api_raw_responses_table.sql
+│   └── V5__Create_conversation_summarization_table.sql  # ✅ NOVO
+├── fxml/                    # Interfaces JavaFX
+└── css/                     # Estilos da interface
 ```
 
 ### Principais Componentes
 
-- **ChatController**: Gerencia a interação do usuário e coordena as operações
-- **ConversationService**: Lógica de negócio para conversas e mensagens
-- **AIService**: Integração com a API da DeepSeek
-- **Repositories**: Acesso aos dados (conversas, mensagens, respostas brutas da API)
-- **ConsolePrinter**: Formatação e exibição colorida no terminal
-- **DatabaseConfig**: Configuração do banco SQLite com HikariCP e Flyway
+#### Camada de Apresentação
+- **IntegratedMainController**: Interface principal com chat e sumarização
+- **SummaryModalController**: Modal para exibição de resumos
+- **MarkdownView**: Componente para renderização de Markdown
+
+#### Camada de Serviços
+- **ConversationService**: Lógica principal de conversas e sumarização
+- **AIService**: Integração com API DeepSeek
+- **MockChatService**: Simulação para desenvolvimento
+
+#### Camada de Dados
+- **ConversationSummarizationRepository**: Gestão de resumos ✅ NOVO
+- **ConversationRepository**: Gestão de conversas
+- **MessageRepository**: Gestão de mensagens
+- **ApiRawResponseRepository**: Log de respostas da API
 
 ## 🗃️ Modelo de Dados
 
-### Tabelas Principais
+### Esquema do Banco de Dados
 
-- **conversations**: Armazena informações das conversas
-- **messages**: Armazena mensagens individuais com roles (USER, ASSISTANT, SYSTEM)
-- **roles**: Tipos de participantes nas conversas (gerenciada pelo Flyway)
-- **api_raw_responses**: Log das respostas brutas da API (para debug)
+O projeto possui um esquema completo com 5 tabelas principais:
+
+#### Tabelas Principais
+- **`roles`**: Tipos de participantes (SYSTEM, USER, ASSISTANT)
+- **`conversations`**: Informações das conversas
+- **`messages`**: Mensagens individuais das conversas
+- **`api_raw_responses`**: Log das respostas brutas da API
+- **`conversations_summarizations`**: Sumarizações das conversas ✅ NOVO
+
+#### Nova Funcionalidade: Sumarização
+```sql
+conversations_summarizations (
+    id VARCHAR(36) PRIMARY KEY,
+    origin_conversation_id VARCHAR(36) NOT NULL,
+    summary TEXT NOT NULL,
+    tokens_used INTEGER DEFAULT 0,           -- ✅ Controle de uso
+    summary_method VARCHAR(50) DEFAULT 'deepseek', -- ✅ Rastreabilidade  
+    is_active BOOLEAN DEFAULT 1,             -- ✅ Soft delete
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (origin_conversation_id) REFERENCES conversations(id)
+);
+```
+
+#### Relacionamentos
+- `conversations` ↔ `messages` (1:N)
+- `conversations` ↔ `api_raw_responses` (1:N) 
+- `conversations` ↔ `conversations_summarizations` (1:N) ✅ NOVO
+- `roles` ↔ `messages` (1:N)
 
 ## 🔄 Migrações de Banco de Dados
 
-O projeto utiliza **Flyway** para gerenciamento de migrações:
+O projeto utiliza **Flyway** para gerenciamento automatizado de migrações:
 
-### Estrutura de Migrações
-- **V1__Create_roles_table.sql**: Cria tabela de roles e popula com dados iniciais
-- Futuras migrações seguem o padrão `V{número}__{descrição}.sql`
+### Scripts de Migração Implementados
+| Versão | Arquivo | Descrição |
+|--------|---------|-----------|
+| **V1** | `V1__Create_roles_table.sql` | Cria tabela de roles e dados iniciais |
+| **V2** | `V2__Create_conversations_table.sql` | Cria tabela de conversas |
+| **V3** | `V3__Create_messages_table.sql` | Cria tabela de mensagens |
+| **V4** | `V4__Create_api_raw_responses_table.sql` | Cria log de respostas da API |
+| **V5** | `V5__Create_conversation_summarization_table.sql` | ✅ **NOVO**: Sumarizações |
 
-### Como Funciona
-1. Na primeira execução, o Flyway cria a tabela `flyway_schema_history`
-2. Executa todas as migrações pendentes na ordem correta
-3. Registra cada migração executada para evitar re-execução
-4. O Exposed então cria as tabelas restantes (conversations, messages, api_raw_responses)
+### Processo Automatizado
+1. **Primeira Execução**: Flyway cria `flyway_schema_history`
+2. **Execução Sequencial**: Todas as migrações pendentes são aplicadas
+3. **Controle de Estado**: Cada migração é registrada para evitar re-execução
+4. **Criação Exposed**: Tabelas restantes são gerenciadas pelo Exposed ORM
 
-### Adicionando Nova Migração
-1. Crie um arquivo em `src/main/resources/db/migration/`
-2. Use o padrão de nomenclatura: `V{número}__{descrição}.sql`
-3. A migração será executada automaticamente na próxima inicialização
+## 🎯 Funcionalidades de Sumarização
+
+### ✅ Implementadas
+- **Interface Gráfica**: Modal dedicado para sumarizações
+- **Confirmação de Usuário**: Dialog antes de gerar resumo
+- **Persistência Completa**: Armazenamento com metadados
+- **Contagem de Tokens**: Monitoramento em tempo real
+- **Suporte a Markdown**: Renderização formatada dos resumos
+- **Gerenciamento de Status**: Ativação/desativação de resumos
+
+### 🔄 Em Desenvolvimento
+- **API DeepSeek Real**: Integração com endpoint de sumarização
+- **Chamadas Assíncronas**: Otimização de performance
+- **Alertas Refinados**: Notificações mais discretas
+
+### ⬜ Planejadas
+- **Persistência como Mensagem**: Resumos no histórico de chat
+- **Nova Conversa**: Início automático a partir de resumos
+- **Exportação**: Salvamento de resumos em múltiplos formatos
 
 ## 🔧 Configurações Avançadas
 
-### Timeout da API
-O cliente HTTP está configurado com timeouts generosos para a API da DeepSeek:
-- Request timeout: 10 minutos
-- Socket timeout: 10 minutos  
-- Connect timeout: 5 minutos
+### API DeepSeek
+```hocon
+api {
+  key = "sua-chave-api"
+  timeout = 600000      # 10 minutos
+  max_tokens = 131072   # 128k tokens
+}
+```
 
-### Pool de Conexões
-O HikariCP está configurado com:
-- Pool máximo: 1 conexão (adequado para SQLite)
-- Auto-commit: desabilitado
+### Banco de Dados
+```hocon
+database {
+  path = "./data/chat.db"
+  pool_size = 1         # Adequado para SQLite
+  auto_commit = false
+}
+```
 
 ### Flyway
-- Localização das migrações: `classpath:db/migration`
-- Execução automática na inicialização da aplicação
-- Compatível com SQLite
+- **Localização**: `classpath:db/migration`
+- **Execução**: Automática na inicialização
+- **Compatibilidade**: SQLite otimizado
+
+### Interface JavaFX
+- **Tema**: Responsivo com CSS personalizado
+- **Renderização**: Markdown nativo com WebView
+- **Modais**: Redimensionáveis e centralizados
+
+## 🧪 Testes
+
+### Cobertura Atual
+- ✅ **Repository Tests**: Todas as repositories com testes completos
+- ✅ **Service Tests**: ConversationService com mocks
+- ✅ **Integration Tests**: Flyway migrations e banco de dados
+- 🔄 **UI Tests**: Em desenvolvimento para componentes JavaFX
+
+### Executar Testes
+```bash
+# Todos os testes
+./gradlew test
+
+# Testes específicos
+./gradlew test --tests "*ConversationSummarizationRepositoryTest*"
+./gradlew test --tests "*ConversationServiceTest*"
+```
+
+## 📊 Métricas do Projeto
+
+### Linhas de Código (aproximadas)
+- **Controllers**: ~1200 LOC (CLI + JavaFX)
+- **Services**: ~800 LOC
+- **Repositories**: ~600 LOC  
+- **Models**: ~400 LOC
+- **Tests**: ~1000 LOC
+- **Total**: ~4000 LOC
+
+### Funcionalidades por Status
+- ✅ **Concluídas**: Interface gráfica, CLI, persistência, sumarização básica
+- 🔄 **Em desenvolvimento**: API real, otimizações, refinamentos
+- ⬜ **Planejadas**: Exportação, funcionalidades avançadas
 
 ## 🤝 Contribuindo
 
@@ -195,44 +354,48 @@ O HikariCP está configurado com:
 4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
-### Contribuindo com Migrações
-- Sempre crie uma nova migração para mudanças de schema
-- Nunca modifique migrações já executadas
-- Teste as migrações localmente antes do commit
+### Diretrizes de Contribuição
+- **Arquitetura**: Mantenha a separação Controller → Service → Repository
+- **Testes**: Adicione testes para novas funcionalidades
+- **Migrações**: Sempre crie nova migração para mudanças de schema
+- **Documentação**: Atualize README.md e documentação técnica
 
-## 📝 Licença
+## 📜 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está licenciado sob a [MIT License](LICENSE).
 
-## 🔍 Funcionalidades Futuras
+---
 
-- [ ] Implementar exclusão de conversas
-- [ ] Adicionar suporte a diferentes modelos de IA
-- [ ] Implementar exportação de conversas
-- [ ] Adicionar sistema de tags para conversas
-- [ ] Interface web opcional
-- [ ] Suporte a arquivos e imagens
-- [ ] Migrações para índices de performance
-- [ ] Backup automático do banco de dados
+## 🏆 Marcos do Projeto
 
-## 🐛 Problemas Conhecidos
+### Fase 1 ✅ - Interface CLI
+- Chat interativo via terminal
+- Persistência básica
+- Comandos de navegação
 
-- A funcionalidade de exclusão de conversas ainda não está implementada
-- O sistema de geração automática de títulos usa apenas os primeiros 50 caracteres da mensagem
+### Fase 2 ✅ - Interface JavaFX
+- GUI moderna e responsiva
+- Suporte a Markdown
+- Lista de conversas
 
-## 📞 Suporte
+### Fase 3 ✅ - Melhorias de UX
+- Otimizações de interface
+- Componentes reutilizáveis
+- Estilização avançada
 
-Para reportar bugs ou solicitar funcionalidades, abra uma issue no repositório do projeto.
+### Fase 4 🔄 - Sumarização (Em Progresso)
+- ✅ Interface de sumarização
+- ✅ Persistência completa
+- ✅ Gerenciamento de tokens
+- 🔄 API DeepSeek real
+- ⬜ Funcionalidades avançadas
 
-## 🔧 Troubleshooting
+### Fase 5 ⬜ - Funcionalidades Avançadas (Planejada)
+- Exportação/importação
+- Múltiplos usuários
+- Configurações personalizáveis
+- Temas e customização
 
-### Problemas de Migração
-Se houver problemas com migrações:
-1. Verifique se o arquivo SQLite não está corrompido
-2. Delete o banco e execute novamente (dados serão perdidos)
-3. Verifique os logs do Flyway para detalhes do erro
+---
 
-### Performance
-Para melhor performance com grandes volumes de dados:
-- Considere adicionar índices via migrações futuras
-- Monitor o tamanho do arquivo SQLite
+**HexaSilith Chat** - Conversas inteligentes com tecnologia moderna 🚀
