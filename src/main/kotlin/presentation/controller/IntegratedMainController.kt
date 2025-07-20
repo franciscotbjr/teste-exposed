@@ -681,28 +681,29 @@ class IntegratedMainController(
     }
 
     /**
-     * A relação NÃO é constante
+     * # A relação NÃO é constante
      *
      * A proporção de ~3,89 caracteres por token é uma média observada
      * em textos em português/inglês, mas varia significativamente dependendo de:
-     * Fator	Efeito na relação	Exemplo
-     * # 1.
+     * - Fatores como	 idioma, complexidade do texto, uso de símbolos e pontuação
+     * - Efeito na relação tokens/caracteres:
+     * ## 1.
      * - Fator: Idioma
      * - Efeito na relação: Línguas flexionadas (como português) usam mais tokens por palavra
      * - Exemplo: "gatos" = 2 tokens ("gat" + "os")
-     * # 2.
+     * ## 2.
      * - Fator: Palavras técnicas
      * - Efeito na relação: Termos técnicos/complexos são divididos em mais tokens
      * - Exemplo: "tokenização" = 4 tokens
-     * # 3.
+     * ## 3.
      * - Fator: Números e símbolos
      * - Efeito na relação: Cada símbolo geralmente é um token separado
      * - Exemplo: "42.5%" = 4 tokens
-     * # 4.
+     * ## 4.
      * - Fator: Espaços e pontuação
      * - Efeito na relação: Contabilizados como tokens individuais
      * - Exemplo: "\n", "." são tokens
-     * # 5.
+     * ## 5.
      * - Fator: Modelo de tokenização
      * - Efeito na relação: Diferentes modelos (BPE, WordPiece) têm regras distintas
      */
