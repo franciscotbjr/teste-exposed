@@ -77,7 +77,6 @@ class ConversationSummarizationRepositoryTest {
         // Then
         assertNotNull(conversationSummarization.id)
         assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
-        assertNull(conversationSummarization.destinyConversationId)
         assertEquals(summary, conversationSummarization.summary)
         assertEquals(tokensUsed, conversationSummarization.tokensUsed)
         assertEquals(summaryMethod, conversationSummarization.summaryMethod)
@@ -98,45 +97,11 @@ class ConversationSummarizationRepositoryTest {
         // Then
         assertNotNull(conversationSummarization.id)
         assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
-        assertNull(conversationSummarization.destinyConversationId)
         assertEquals(summary, conversationSummarization.summary)
         assertEquals(0, conversationSummarization.tokensUsed)
         assertEquals("deepseek", conversationSummarization.summaryMethod)
         assertTrue(conversationSummarization.isActive)
         assertNotNull(conversationSummarization.createdAt)
-    }
-
-    @Test
-    fun `should update Conversation Summarization successfully`() {
-        // Given
-        val summary = "Resumo: O usuário solicitou tradução do termo 'sumarização' para inglês. " +
-                "Foi definido como 'Conversation Summarization', " +
-                "com alternativas como 'Context Summarization'. " +
-                "Discutiu-se também uso em APIs para gerenciamento de tokens."
-        val tokensUsed = 200
-
-        // When
-        val conversationSummarization = conversationSummarizationRepository.create(
-            testConversationOrigin.id,
-            summary,
-            tokensUsed)
-
-        // Then
-        assertNotNull(conversationSummarization.id)
-        assertEquals(testConversationOrigin.id, conversationSummarization.originConversationId)
-        assertNull(conversationSummarization.destinyConversationId)
-        assertEquals(summary, conversationSummarization.summary)
-        assertEquals(tokensUsed, conversationSummarization.tokensUsed)
-        assertNotNull(conversationSummarization.createdAt)
-
-        val testConversationDestiny = conversationRepository.create("Test Destiny Conversation")
-
-        val result = conversationSummarizationRepository.updateDestinyConversationId(
-            conversationSummarization.id,
-            testConversationDestiny.id)
-
-        assertEquals(result, 1)
-
     }
 
     @Test
@@ -184,35 +149,6 @@ class ConversationSummarizationRepositoryTest {
         assertEquals(conversationSummarizationFound.originConversationId, testConversationOrigin.id)
         assertEquals(tokensUsed, conversationSummarizationFound.tokensUsed)
         assertTrue(conversationSummarizationFound.isActive)
-
-    }
-
-    @Test
-    fun `should find Conversation Summarization by conversation destiny id`() {
-        // Given
-        val summary = "Resumo: O usuário solicitou tradução do termo 'sumarização' para inglês. " +
-                "Foi definido como 'Conversation Summarization', " +
-                "com alternativas como 'Context Summarization'. " +
-                "Discutiu-se também uso em APIs para gerenciamento de tokens."
-        val testConversationDestiny = conversationRepository.create("Test Destiny Conversation")
-        val tokensUsed = 300
-
-        // When
-        val conversationSummarization = conversationSummarizationRepository.create(
-            testConversationOrigin.id,
-            summary,
-            tokensUsed)
-
-        val result = conversationSummarizationRepository.updateDestinyConversationId(
-            conversationSummarization.id,
-            testConversationDestiny.id)
-
-        val conversationSummarizationFound = conversationSummarizationRepository.findByDestinyConversationId(testConversationDestiny.id)
-
-        // Then
-        assertEquals(conversationSummarizationFound?.originConversationId, testConversationOrigin.id)
-        assertEquals(tokensUsed, conversationSummarizationFound?.tokensUsed)
-        assertTrue(conversationSummarizationFound?.isActive == true)
 
     }
 

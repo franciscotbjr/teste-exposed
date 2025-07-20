@@ -22,6 +22,7 @@ class ConversationRepository(private val database: Database) {
         }.let {
             Conversation(
                 id = UUID.fromString(it[Conversations.id]),
+                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
                 title = it[Conversations.title],
                 createdAt = it[Conversations.createdAt],
                 updatedAt = it[Conversations.updatedAt]
@@ -33,6 +34,7 @@ class ConversationRepository(private val database: Database) {
         Conversations.selectAll().map {
             Conversation(
                 UUID.fromString(it[Conversations.id]),
+                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
                 it[Conversations.title],
                 it[Conversations.createdAt],
                 it[Conversations.updatedAt]
@@ -52,6 +54,7 @@ class ConversationRepository(private val database: Database) {
             .where { Conversations.id eq id.toString() }.singleOrNull()?.let {
             Conversation(
                 UUID.fromString(it[Conversations.id]),
+                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
                 it[Conversations.title],
                 it[Conversations.createdAt],
                 it[Conversations.updatedAt]

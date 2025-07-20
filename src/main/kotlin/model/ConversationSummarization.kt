@@ -7,7 +7,6 @@ import java.util.UUID
 data class ConversationSummarization (
     val id: UUID = UUID.randomUUID(),
     val originConversationId: UUID, // Referente à conversa que foi sumarizada
-    val destinyConversationId: UUID?, // Quando uma nova conversa é criada a partir da sumarização, este campo será preenchido
     val summary: String, // A sumarização da conversa que foi feita
     val tokensUsed: Int = 0, // Total de tokens utilizados na sumarização
     val summaryMethod: String = "deepseek", // Tipo de sumarização (ex: "deepseek", "auto", etc.)

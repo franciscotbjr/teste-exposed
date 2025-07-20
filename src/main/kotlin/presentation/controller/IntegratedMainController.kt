@@ -317,7 +317,10 @@ class IntegratedMainController(
 
     private fun sendMessage() {
         val text = messageInput.text.trim()
-        if (text.isBlank() || currentConversation == null) return
+        if (text.isBlank()) return
+        if (currentConversation == null) {
+            currentConversation = DataConverter.toConversationItem(conversationService.createConversation(text))
+        }
 
         // Calcular tokens antes de enviar a mensagem
         val estimatedTokens = estimateTokens(text)

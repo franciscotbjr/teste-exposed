@@ -18,7 +18,7 @@ class ConversationService(
     private val aiService: AIService
 ) {
     fun createConversation(title: String): Conversation {
-        return conversationRepository.create(title)
+        return conversationRepository.create(generateTitleForConversation(title))
     }
 
     fun listConversations(): List<Conversation> {
@@ -150,14 +150,6 @@ ${if (messages.isNotEmpty()) {
 
     fun getConversationSummaries(conversationId: UUID, includeInactive: Boolean = false): List<ConversationSummarization> {
         return conversationSummarizationRepository.findByOriginConversationId(conversationId, includeInactive)
-    }
-
-    fun updateSummaryDestinyConversation(summaryId: UUID, destinyConversationId: UUID): Boolean {
-        return try {
-            conversationSummarizationRepository.updateDestinyConversationId(summaryId, destinyConversationId) > 0
-        } catch (e: Exception) {
-            false
-        }
     }
 
     fun deactivateConversationSummary(summaryId: UUID): Boolean {

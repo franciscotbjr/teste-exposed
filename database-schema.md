@@ -6,37 +6,50 @@ Este documento contém o diagrama ER (Entity-Relationship) do banco de dados da 
 
 ```mermaid
 erDiagram
-    ROLES {
-        varchar name PK "VARCHAR(15)"
-        datetime created_at "DATETIME DEFAULT CURRENT_TIMESTAMP"
+    roles {
+        VARCHAR(15) name PK
+        DATETIME created_at
     }
     
-    CONVERSATIONS {
-        varchar id PK "VARCHAR(36)"
-        varchar title "VARCHAR(256) NOT NULL"
-        datetime created_at "DATETIME DEFAULT CURRENT_TIMESTAMP"
-        datetime updated_at "DATETIME DEFAULT CURRENT_TIMESTAMP"
+    conversations {
+        VARCHAR(36) id PK
+        VARCHAR(36) conversation_summarization_id FK
+        VARCHAR(256) title
+        DATETIME created_at
+        DATETIME updated_at
     }
     
-    MESSAGES {
-        varchar id PK "VARCHAR(36)"
-        varchar conversation_id FK "VARCHAR(36) NOT NULL"
-        varchar role FK "VARCHAR(15) NOT NULL"
-        text content "TEXT NOT NULL"
-        datetime created_at "DATETIME DEFAULT CURRENT_TIMESTAMP"
+    messages {
+        VARCHAR(36) id PK
+        VARCHAR(36) conversation_id FK
+        VARCHAR(15) role FK
+        TEXT content
+        DATETIME created_at
     }
     
-    API_RAW_RESPONSES {
-        varchar id PK "VARCHAR(36)"
-        varchar conversation_id FK "VARCHAR(36) NOT NULL"
-        text raw_json "TEXT NOT NULL"
-        datetime created_at "DATETIME DEFAULT CURRENT_TIMESTAMP"
+    api_raw_responses {
+        VARCHAR(36) id PK
+        VARCHAR(36) conversation_id FK
+        TEXT raw_json
+        DATETIME created_at
     }
     
-    %% Relacionamentos
-    CONVERSATIONS ||--o{ MESSAGES : "has many"
-    CONVERSATIONS ||--o{ API_RAW_RESPONSES : "has many"
-    ROLES ||--o{ MESSAGES : "defines"
+    conversations_summarizations {
+        VARCHAR(36) id PK
+        VARCHAR(36) origin_conversation_id FK
+        TEXT summary
+        INTEGER tokens_used
+        VARCHAR(50) summary_method
+        BOOLEAN is_active
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    roles ||--o{ messages : "role"
+    conversations ||--o{ messages : "conversation_id"
+    conversations ||--o{ api_raw_responses : "conversation_id"
+    conversations ||--o{ conversations_summarizations : "origin_conversation_id"
+    conversations }o--|| conversations_summarizations : "conversation_summarization_id"
 ```
 
 ## Descrição das Tabelas
@@ -67,6 +80,12 @@ erDiagram
 - **Relacionamentos**: Pertence a uma CONVERSATION
 - **Características**: Armazena JSON completo da resposta da API
 - **Gerenciamento**: Criada via Flyway migration V4
+- 
+### 🔧 CONVERSATIONS_SUMMARIZATIONS
+- **Propósito**: Armazena resumos de conversas
+- **Relacionamentos**: Pertence a uma CONVERSATION
+- **Características**: Armazena resumo, tokens usados, método de resumo e status ativo/inativo
+- **Gerenciamento**: Criada via Flyway migration V5
 
 ## Índices de Performance
 
@@ -105,12 +124,13 @@ sequenceDiagram
 
 ## Migrações Flyway
 
-| Versão | Arquivo | Descrição |
-|--------|---------|-----------|
-| V1 | `V1__Create_roles_table.sql` | Cria tabela ROLES e insere dados iniciais |
-| V2 | `V2__Create_conversations_table.sql` | Cria tabela CONVERSATIONS com índices |
-| V3 | `V3__Create_messages_table.sql` | Cria tabela MESSAGES com FKs e índices |
-| V4 | `V4__Create_api_raw_responses_table.sql` | Cria tabela API_RAW_RESPONSES |
+| Versão | Arquivo                                           | Descrição                                 |
+|--------|---------------------------------------------------|-------------------------------------------|
+| V1     | `V1__Create_roles_table.sql`                      | Cria tabela ROLES e insere dados iniciais |
+| V2     | `V2__Create_conversations_table.sql`              | Cria tabela CONVERSATIONS com índices     |
+| V3     | `V3__Create_messages_table.sql`                   | Cria tabela MESSAGES com FKs e índices    |
+| V4     | `V4__Create_api_raw_responses_table.sql`          | Cria tabela API_RAW_RESPONSES             |
+| V5     | `V5__Create_conversation_summarization_table.sql` | Cria tabela CONVERSATIONS_SUMMARIZATIONS  |
 
 ## Constraints e Integridade
 

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS messages (
     role VARCHAR(15) NOT NULL,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- Chaves estrangeiras baseadas nas classes Exposed
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE NO ACTION,
     FOREIGN KEY (role) REFERENCES roles(name) ON DELETE NO ACTION

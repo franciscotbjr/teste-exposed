@@ -32,23 +32,12 @@ class ConversationSummarizationRepository(private val database: Database) {
             ConversationSummarization(
                 id = UUID.fromString(it[ConversationsSummarizations.id]),
                 originConversationId = UUID.fromString(it[ConversationsSummarizations.originConversationId]),
-                destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
                 summary = it[ConversationsSummarizations.summary],
                 tokensUsed = it[ConversationsSummarizations.tokensUsed],
                 summaryMethod = it[ConversationsSummarizations.summaryMethod],
                 isActive = it[ConversationsSummarizations.isActive],
                 createdAt = it[ConversationsSummarizations.createdAt]
             )
-        }
-    }
-
-    fun updateDestinyConversationId(
-        summarizationId: UUID,
-        destinyConversationId: UUID
-    ): Int = transaction(database) {
-        ConversationsSummarizations.update({ ConversationsSummarizations.id eq summarizationId.toString() }) {
-            it[this.destinyConversationId] = destinyConversationId.toString()
-            it[this.updatedAt] = LocalDateTime.now()
         }
     }
 
@@ -76,26 +65,6 @@ class ConversationSummarizationRepository(private val database: Database) {
                 ConversationSummarization(
                     UUID.fromString(it[ConversationsSummarizations.id]),
                     UUID.fromString(it[ConversationsSummarizations.originConversationId]),
-                    destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
-                    it[ConversationsSummarizations.summary],
-                    it[ConversationsSummarizations.tokensUsed],
-                    it[ConversationsSummarizations.summaryMethod],
-                    it[ConversationsSummarizations.isActive],
-                    it[ConversationsSummarizations.createdAt],
-                    it[ConversationsSummarizations.updatedAt]
-                )
-            }
-    }
-
-    fun findByDestinyConversationId(destinyConversationId: UUID): ConversationSummarization? = transaction(database) {
-        ConversationsSummarizations.selectAll()
-            .where { ConversationsSummarizations.destinyConversationId eq destinyConversationId.toString() }
-            .singleOrNull()
-            ?.let {
-                ConversationSummarization(
-                    UUID.fromString(it[ConversationsSummarizations.id]),
-                    UUID.fromString(it[ConversationsSummarizations.originConversationId]),
-                    destinyConversationId = it[ConversationsSummarizations.destinyConversationId]?.let { UUID.fromString(it) } ?: null,
                     it[ConversationsSummarizations.summary],
                     it[ConversationsSummarizations.tokensUsed],
                     it[ConversationsSummarizations.summaryMethod],
