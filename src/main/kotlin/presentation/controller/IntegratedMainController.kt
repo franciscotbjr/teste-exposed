@@ -680,6 +680,32 @@ class IntegratedMainController(
         tokenAlertMessage.text = "Conversa usando $percentage% dos tokens ($currentTokenCount/$tokenLimit)"
     }
 
+    /**
+     * A relação NÃO é constante
+     *
+     * A proporção de ~3,89 caracteres por token é uma média observada
+     * em textos em português/inglês, mas varia significativamente dependendo de:
+     * Fator	Efeito na relação	Exemplo
+     * # 1.
+     * - Fator: Idioma
+     * - Efeito na relação: Línguas flexionadas (como português) usam mais tokens por palavra
+     * - Exemplo: "gatos" = 2 tokens ("gat" + "os")
+     * # 2.
+     * - Fator: Palavras técnicas
+     * - Efeito na relação: Termos técnicos/complexos são divididos em mais tokens
+     * - Exemplo: "tokenização" = 4 tokens
+     * # 3.
+     * - Fator: Números e símbolos
+     * - Efeito na relação: Cada símbolo geralmente é um token separado
+     * - Exemplo: "42.5%" = 4 tokens
+     * # 4.
+     * - Fator: Espaços e pontuação
+     * - Efeito na relação: Contabilizados como tokens individuais
+     * - Exemplo: "\n", "." são tokens
+     * # 5.
+     * - Fator: Modelo de tokenização
+     * - Efeito na relação: Diferentes modelos (BPE, WordPiece) têm regras distintas
+     */
     private fun estimateTokens(text: String): Int {
         // Estimativa simples de tokens (aproximadamente 1 token por 4 caracteres para português)
         return (text.length / 4).coerceAtLeast(1)
