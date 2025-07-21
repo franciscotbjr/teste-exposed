@@ -86,7 +86,7 @@ class MarkdownView : VBox() {
 
         return Label(header.text).apply {
             font = Font.font("Arial", FontWeight.BOLD, fontSize)
-            textFill = Color.WHITE
+            textFill = getTextColor()  // Cor dinâmica baseada no contexto
             styleClass.add("markdown-header")
             styleClass.add("markdown-header-${header.level}")
         }
@@ -139,11 +139,11 @@ class MarkdownView : VBox() {
                     children.addAll(
                         Text("• ").apply {
                             font = Font.font("Arial", FontWeight.BOLD, 14.0)
-                            fill = Color.WHITE
+                            fill = getTextColor()  // Cor dinâmica
                         },
                         Text(item).apply {
                             font = Font.font("Arial", FontWeight.NORMAL, 14.0)
-                            fill = Color.WHITE
+                            fill = getTextColor()  // Cor dinâmica
                         }
                     )
                 }
@@ -165,11 +165,11 @@ class MarkdownView : VBox() {
                     children.addAll(
                         Text("${index + 1}. ").apply {
                             font = Font.font("Arial", FontWeight.BOLD, 14.0)
-                            fill = Color.WHITE
+                            fill = getTextColor()  // Cor dinâmica
                         },
                         Text(item).apply {
                             font = Font.font("Arial", FontWeight.NORMAL, 14.0)
-                            fill = Color.WHITE
+                            fill = getTextColor()  // Cor dinâmica
                         }
                     )
                 }
@@ -188,7 +188,7 @@ class MarkdownView : VBox() {
 
             val quoteNode = Text(blockquote.content).apply {
                 font = Font.font("Arial", FontWeight.NORMAL, 14.0)
-                fill = Color.WHITE
+                fill = getTextColor()  // Cor dinâmica
                 style = "-fx-font-style: italic;"
             }
 
@@ -221,36 +221,36 @@ class MarkdownView : VBox() {
     private fun createPlainText(text: String): Text {
         return Text(text).apply {
             font = Font.font("Arial", FontWeight.NORMAL, 14.0)
-            fill = Color.WHITE
+            fill = getTextColor()  // Cor dinâmica
         }
     }
 
     private fun createBoldText(text: String): Text {
         return Text(text).apply {
             font = Font.font("Arial", FontWeight.BOLD, 14.0)
-            fill = Color.WHITE
+            fill = getTextColor()  // Cor dinâmica
         }
     }
 
     private fun createItalicText(text: String): Text {
         return Text(text).apply {
             font = Font.font("Arial", FontPosture.ITALIC, 14.0)
-            fill = Color.WHITE
+            fill = getTextColor()  // Cor dinâmica
         }
     }
 
     private fun createInlineCode(code: String): Text {
         return Text(code).apply {
             font = Font.font("Consolas", FontWeight.NORMAL, 12.0)
-            fill = Color.WHITE
-            style = "-fx-background-color: rgba(255, 255, 255, 0.2); -fx-background-radius: 2px;"
+            fill = getTextColor()  // Cor dinâmica
+            style = "-fx-background-color: rgba(128, 128, 128, 0.2); -fx-background-radius: 2px;"
         }
     }
 
     private fun createStrikeThrough(text: String): Text {
         return Text(text).apply {
             font = Font.font("Arial", FontWeight.NORMAL, 14.0)
-            fill = Color.WHITE
+            fill = getTextColor()  // Cor dinâmica
             isStrikethrough = true
         }
     }
@@ -276,8 +276,19 @@ class MarkdownView : VBox() {
     private fun createBoldItalicText(text: String): Text {
         return Text(text).apply {
             font = Font.font("Arial", FontWeight.BOLD, 14.0)
-            fill = Color.WHITE
+            fill = getTextColor()  // Cor dinâmica
             style = "-fx-font-style: italic;"
+        }
+    }
+
+    /**
+     * Obtém a cor do texto com base no contexto da mensagem
+     */
+    private fun getTextColor(): Color {
+        return if (isUserMessage) {
+            Color.WHITE  // Mensagens do usuário (fundo escuro)
+        } else {
+            Color.DARKSLATEGRAY  // Mensagens da IA/sumarização (fundo branco)
         }
     }
 }

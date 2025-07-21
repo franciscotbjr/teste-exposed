@@ -12,7 +12,11 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.Stage
+import kotlinx.coroutines.*
+import org.hexasilith.model.ConversationSummarization
 import org.hexasilith.presentation.component.MarkdownView
+import org.hexasilith.service.ConversationService
+import java.util.UUID
 
 class SummaryModalController {
 
@@ -42,9 +46,45 @@ class SummaryModalController {
     private var summaryMethod: String = "deepseek"
     private var onNewConversationCallback: (() -> Unit)? = null
     private lateinit var modalStage: Stage
+    private var conversationService: ConversationService? = null
+    private var currentConversationId: UUID? = null
+    private var summarizationJob: Job? = null
+
+    // Componentes para feedback de progresso
+    private var progressIndicator: ProgressIndicator? = null
+    private var progressLabel: Label? = null
+    private var progressContainer: VBox? = null
 
     fun initialize() {
         setupButtons()
+        setupProgressComponents()
+    }
+
+    private fun setupProgressComponents() {
+        // Criar componentes de progresso que serão usados durante o carregamento
+        progressIndicator = ProgressIndicator().apply {
+            prefWidth = 60.0
+            prefHeight = 60.0
+        }
+
+        progressLabel = Label("Gerando resumo da conversa...").apply {
+            styleClass.add("progress-label")
+        }
+
+        progressContainer = VBox().apply {
+            styleClass.add("progress-container")
+            spacing = 20.0
+            alignment = javafx.geometry.Pos.CENTER
+            children.addAll(progressIndicator, progressLabel)
+        }
+    }
+
+    fun setConversationService(conversationService: ConversationService) {
+        this.conversationService = conversationService
+    }
+
+    fun setCurrentConversationId(conversationId: UUID) {
+        this.currentConversationId = conversationId
     }
 
     private fun setupButtons() {
@@ -56,37 +96,148 @@ class SummaryModalController {
 
     fun setModalStage(stage: Stage) {
         this.modalStage = stage
+
+        // Configurar comportamento de fechamento para cancelar operações assíncronas
+        stage.setOnCloseRequest {
+            summarizationJob?.cancel()
+        }
     }
 
-    fun setSummaryContent(
-        summary: String,
-        conversationInfo: String = "",
-        tokensUsed: Int = 0,
-        summaryMethod: String = "deepseek"
-    ) {
-        this.summaryText = summary
-        this.tokensUsed = tokensUsed
-        this.summaryMethod = summaryMethod
+    /**
+     * Inicia o processo de sumarização de forma assíncrona
+     * Primeiro exibe a tela com indicador de progresso, depois executa as operações
+     */
+    fun startSummarizationAsync(conversationId: UUID) {
+        this.currentConversationId = conversationId
 
+        // 1. Exibir tela imediatamente com indicador de progresso
+        showProgressState()
+
+        // 2. Executar sumarização de forma assíncrona
+        summarizationJob = CoroutineScope(Dispatchers.IO).launch {
+            try {
+                updateProgress("Coletando mensagens da conversa...")
+
+                val conversationService = this@SummaryModalController.conversationService
+                    ?: throw IllegalStateException("ConversationService não configurado")
+
+                // Simular pequeno delay para garantir que a UI seja mostrada
+                delay(100)
+
+                updateProgress("Conectando com a API DeepSeek...")
+
+                // Executar sumarização (operações HTTP e SQL)
+                val summarization = conversationService.createConversationSummary(conversationId)
+
+                updateProgress("Processando resumo...")
+                delay(200) // Pequeno delay para suavizar a transição
+
+                // Atualizar UI no thread principal
+                Platform.runLater {
+                    showSummaryResult(summarization)
+                }
+
+            } catch (e: CancellationException) {
+                Platform.runLater {
+                    showError("Operação cancelada pelo usuário")
+                }
+            } catch (e: Exception) {
+                Platform.runLater {
+                    showError("Erro ao gerar resumo: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private suspend fun updateProgress(message: String) {
+        Platform.runLater {
+            progressLabel?.text = message
+        }
+    }
+
+    private fun showProgressState() {
         Platform.runLater {
             summaryContent.children.clear()
+            progressContainer?.let { summaryContent.children.add(it) }
 
-            val markdownView = MarkdownView()
-            markdownView.setMarkdown(summary, isUserMessage = false)
-            markdownView.prefWidth = 750.0
-            markdownView.maxWidth = 750.0
+            // Desabilitar botões durante o carregamento
+            newConversationFromSummaryButton.isDisable = true
+            copySummaryButton.isDisable = true
+            exportSummaryButton.isDisable = true
 
-            summaryContent.children.add(markdownView)
-
-            if (conversationInfo.isNotEmpty()) {
-                summaryInfoLabel.text = "$conversationInfo • Tokens: $tokensUsed • Método: $summaryMethod"
-            } else {
-                summaryInfoLabel.text = "Tokens utilizados: $tokensUsed • Método: $summaryMethod"
-            }
-
-            // Scroll para o topo
-            summaryScrollPane.vvalue = 0.0
+            // Atualizar info label
+            summaryInfoLabel.text = "Gerando resumo automaticamente..."
         }
+    }
+
+    private fun showSummaryResult(summarization: ConversationSummarization) {
+        this.summaryText = summarization.summary
+        this.tokensUsed = summarization.tokensUsed
+        this.summaryMethod = summarization.summaryMethod
+
+        summaryContent.children.clear()
+
+        val markdownView = MarkdownView()
+        markdownView.setMarkdown(summarization.summary, isUserMessage = false)
+        markdownView.prefWidth = 750.0
+        markdownView.maxWidth = 750.0
+
+        summaryContent.children.add(markdownView)
+
+        // Atualizar informações
+        val createdAt = summarization.createdAt.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+        summaryInfoLabel.text = "Gerado em $createdAt • Tokens: ${summarization.tokensUsed} • Método: ${summarization.summaryMethod}"
+
+        // Reabilitar botões
+        newConversationFromSummaryButton.isDisable = false
+        copySummaryButton.isDisable = false
+        exportSummaryButton.isDisable = false
+
+        // Scroll para o topo
+        summaryScrollPane.vvalue = 0.0
+    }
+
+    private fun showError(errorMessage: String) {
+        summaryContent.children.clear()
+
+        val errorContainer = VBox().apply {
+            styleClass.add("error-container")
+            spacing = 15.0
+            alignment = javafx.geometry.Pos.CENTER
+        }
+
+        val errorIcon = Label("⚠️").apply {
+            styleClass.add("error-icon")
+            style = "-fx-font-size: 48px;"
+        }
+
+        val errorLabel = Label("Erro ao Gerar Resumo").apply {
+            styleClass.add("error-title")
+        }
+
+        val errorDetails = Label(errorMessage).apply {
+            styleClass.add("error-details")
+            isWrapText = true
+            maxWidth = 600.0
+        }
+
+        val retryButton = Button("🔄 Tentar Novamente").apply {
+            styleClass.add("retry-btn")
+            setOnAction {
+                currentConversationId?.let { startSummarizationAsync(it) }
+            }
+        }
+
+        errorContainer.children.addAll(errorIcon, errorLabel, errorDetails, retryButton)
+        summaryContent.children.add(errorContainer)
+
+        // Atualizar info label
+        summaryInfoLabel.text = "Falha na geração do resumo"
+
+        // Manter botões desabilitados exceto fechar
+        newConversationFromSummaryButton.isDisable = true
+        copySummaryButton.isDisable = true
+        exportSummaryButton.isDisable = true
     }
 
     fun setOnNewConversationCallback(callback: () -> Unit) {
@@ -230,7 +381,7 @@ class SummaryModalController {
                 }
             }
         } catch (e: Exception) {
-            showError("Erro ao copiar para a área de transferência: ${e.message}")
+            showErrorAlert("Erro ao copiar para a área de transferência: ${e.message}")
         }
     }
 
@@ -243,7 +394,7 @@ class SummaryModalController {
         alert.showAndWait()
     }
 
-    private fun showError(message: String) {
+    private fun showErrorAlert(message: String) {
         val alert = Alert(Alert.AlertType.ERROR)
         alert.title = "Erro"
         alert.headerText = null

@@ -15,7 +15,7 @@
          </children>
       </HBox>
 
-      <!-- Área de conteúdo do resumo -->
+      <!-- Área de conteúdo do resumo (incluirá indicadores de progresso dinamicamente) -->
       <ScrollPane fx:id="summaryScrollPane" styleClass="summary-modal-scroll" VBox.vgrow="ALWAYS">
          <content>
             <VBox fx:id="summaryContent" styleClass="summary-modal-content" />
@@ -25,7 +25,7 @@
       <!-- Rodapé com informações adicionais -->
       <HBox styleClass="summary-modal-footer">
          <children>
-            <Label fx:id="summaryInfoLabel" styleClass="summary-info" text="Resumo gerado automaticamente" />
+            <Label fx:id="summaryInfoLabel" styleClass="summary-info" text="Preparando resumo..." />
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="copySummaryButton" styleClass="copy-summary-btn" text="📋 Copiar" />
             <Button fx:id="exportSummaryButton" styleClass="export-summary-btn" text="💾 Exportar" />

@@ -523,49 +523,11 @@ class IntegratedMainController(
     }
 
     private fun processSummarization(conversation: ConversationItem) {
-        summarizeButton.isDisable = true
-        alertSummarizeButton.isDisable = true
-
-        coroutineScope.launch {
-            try {
-                Platform.runLater {
-                    // Feedback visual durante processamento
-                    summarizeButton.text = "Resumindo..."
-                    alertSummarizeButton.text = "Resumindo..."
-                }
-
-                // Gerar resumo usando o service
-                val conversationSummary = withContext(Dispatchers.IO) {
-                    conversationService.createConversationSummary(
-                        conversationId = UUID.fromString(conversation.id),
-                        tokensUsed = currentTokenCount,
-                        summaryMethod = "deepseek"
-                    )
-                }
-
-                Platform.runLater {
-                    currentSummary = conversationSummary.summary
-                    openSummaryModal(conversationSummary, conversation)
-
-                    // Ocultar alerta se estiver visível
-                    dismissTokenLimitAlert()
-                }
-            } catch (e: Exception) {
-                Platform.runLater {
-                    showError("Erro ao gerar resumo: ${e.message}")
-                }
-            } finally {
-                Platform.runLater {
-                    summarizeButton.isDisable = false
-                    alertSummarizeButton.isDisable = false
-                    summarizeButton.text = "📝 Resumir"
-                    alertSummarizeButton.text = "Resumir Agora"
-                }
-            }
-        }
+        // Abrir modal imediatamente com indicador de progresso
+        openSummaryModalWithProgress(conversation)
     }
 
-    private fun openSummaryModal(conversationSummary: ConversationSummarization, conversation: ConversationItem) {
+    private fun openSummaryModalWithProgress(conversation: ConversationItem) {
         try {
             val fxmlLoader = FXMLLoader(javaClass.getResource("/fxml/summary-modal.fxml"))
             val modalRoot: Parent = fxmlLoader.load()
@@ -583,19 +545,22 @@ class IntegratedMainController(
             scene.stylesheets.add(javaClass.getResource("/css/main-style.css")?.toExternalForm())
             modalStage.scene = scene
 
+            // Configurar o controller com o service e iniciar operação assíncrona
             controller.setModalStage(modalStage)
-            controller.setSummaryContent(
-                summary = conversationSummary.summary,
-                conversationInfo = "Conversa: ${conversation.title} | Última atualização: ${conversation.lastMessageTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))}",
-                tokensUsed = conversationSummary.tokensUsed,
-                summaryMethod = conversationSummary.summaryMethod
-            )
-
+            controller.setConversationService(conversationService)
             controller.setOnNewConversationCallback {
                 createNewConversationFromSummary()
             }
 
-            modalStage.showAndWait()
+            // Exibir modal imediatamente e iniciar sumarização assíncrona
+            modalStage.show() // Usar show() em vez de showAndWait() para não bloquear
+
+            // Iniciar processo assíncrono de sumarização
+            controller.startSummarizationAsync(UUID.fromString(conversation.id))
+
+            // Ocultar alerta se estiver visível
+            dismissTokenLimitAlert()
+
         } catch (e: Exception) {
             showError("Erro ao abrir janela de resumo: ${e.message}")
         }

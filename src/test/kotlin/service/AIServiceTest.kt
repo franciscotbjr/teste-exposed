@@ -12,12 +12,10 @@ import org.hexasilith.model.Message
 import org.hexasilith.model.Role
 import org.hexasilith.service.AIService
 import org.junit.jupiter.api.*
-import java.io.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AIServiceTest {
@@ -26,6 +24,17 @@ class AIServiceTest {
     private lateinit var httpClient: HttpClient
     private lateinit var aiService: AIService
     private val apiKey = "test-api-key"
+
+    private val validApiResponse = """
+        {
+            "choices": [{
+                "message": {
+                    "role": "assistant",
+                    "content": "Hello from DeepSeek AI!"
+                }
+            }]
+        }
+    """.trimIndent()
 
     @BeforeEach
     fun setup() {
@@ -97,8 +106,8 @@ class AIServiceTest {
         val response = aiService.chatCompletion(messages)
 
         // Then
-        assertEquals<Serializable>("Hello! I'm doing well, thank you for asking. How can I help you today?", response.first)
-        
+        assertEquals("Hello from DeepSeek AI!", response.first)
+
         // Verify all messages were included in request
         val request = mockEngine.requestHistory.first()
         assertEquals("https://api.deepseek.com/v1/chat/completions", request.url.toString())
@@ -113,7 +122,7 @@ class AIServiceTest {
         val response = aiService.chatCompletion(messages)
 
         // Then
-        assertEquals("Hello! I'm doing well, thank you for asking. How can I help you today?", response.first)
+        assertEquals("Hello from DeepSeek AI!", response.first)
     }
 
     @Test
@@ -134,44 +143,125 @@ class AIServiceTest {
         // Roles should be correctly mapped to API format
     }
 
+    @Test
+    fun `should summarize conversation with real API call`() = runTest {
+        // Given
+        val messages = listOf(
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.USER,
+                content = "Hello, how are you?",
+                createdAt = LocalDateTime.now()
+            ),
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.ASSISTANT,
+                content = "I'm doing well, thank you for asking!",
+                createdAt = LocalDateTime.now()
+            )
+        )
+
+        // When
+        val (summary, rawResponse) = aiService.summarizeConversation(messages)
+
+        // Then
+        assertEquals("Hello from DeepSeek AI!", summary)
+        assertEquals(validApiResponse, rawResponse)
+
+        // Verify the mock engine was called with correct URL
+        assertEquals("https://api.deepseek.com/v1/chat/completions", mockEngine.requestHistory.first().url.toString())
+
+        // Verify authorization header
+        val authHeader = mockEngine.requestHistory.first().headers[HttpHeaders.Authorization]
+        assertEquals("Bearer $apiKey", authHeader)
+    }
+
+    @Test
+    fun `should format conversation properly for summarization`() = runTest {
+        // Given
+        val messages = listOf(
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.SYSTEM,
+                content = "You are a helpful assistant",
+                createdAt = LocalDateTime.now()
+            ),
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.USER,
+                content = "What is artificial intelligence?",
+                createdAt = LocalDateTime.now()
+            ),
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.ASSISTANT,
+                content = "AI is the simulation of human intelligence processes by machines.",
+                createdAt = LocalDateTime.now()
+            )
+        )
+
+        // When
+        val (summary, rawResponse) = aiService.summarizeConversation(messages)
+
+        // Then
+        assertEquals("Hello from DeepSeek AI!", summary)
+
+        // The request should contain the conversation formatted properly
+        val requestBody = mockEngine.requestHistory.first().body.toByteArray().decodeToString()
+        assertContains(requestBody, "Sistema: You are a helpful assistant")
+        assertContains(requestBody, "Usuário: What is artificial intelligence?")
+        assertContains(requestBody, "Assistente: AI is the simulation of human intelligence processes by machines.")
+    }
+
+    @Test
+    fun `should handle empty conversation for summarization`() = runTest {
+        // Given
+        val emptyMessages = emptyList<Message>()
+
+        // When
+        val (summary, rawResponse) = aiService.summarizeConversation(emptyMessages)
+
+        // Then
+        assertEquals("Hello from DeepSeek AI!", summary)
+        assertEquals(validApiResponse, rawResponse)
+
+        // Should still make API call even with empty conversation
+        assertEquals(1, mockEngine.requestHistory.size)
+    }
+
+    @Test
+    fun `should use system prompt for summarization`() = runTest {
+        // Given
+        val messages = listOf(
+            Message(
+                id = UUID.randomUUID(),
+                conversationId = UUID.randomUUID(),
+                role = Role.USER,
+                content = "Test message",
+                createdAt = LocalDateTime.now()
+            )
+        )
+
+        // When
+        aiService.summarizeConversation(messages)
+
+        // Then
+        val requestBody = mockEngine.requestHistory.first().body.toByteArray().decodeToString()
+        assertContains(requestBody, "Você é um assistente especializado em sumarização de conversas")
+        assertContains(requestBody, "## Resumo da Conversa")
+        assertContains(requestBody, "### 📊 Estatísticas")
+        assertContains(requestBody, "### 🎯 Tópicos Principais")
+        assertContains(requestBody, "### 💬 Resumo do Conteúdo")
+        assertContains(requestBody, "### ✨ Pontos-Chave")
+    }
+
     @AfterEach
     fun cleanup() {
         httpClient.close()
-    }
-
-    companion object {
-        private val validApiResponse = """
-        {
-            "id": "chatcmpl-123",
-            "object": "chat.completion",
-            "created": 1677652288,
-            "model": "deepseek-chat",
-            "choices": [
-                {
-                    "index": 0,
-                    "message": {
-                        "role": "assistant",
-                        "content": "Hello! I'm doing well, thank you for asking. How can I help you today?"
-                    },
-                    "finish_reason": "stop"
-                }
-            ],
-            "usage": {
-                "prompt_tokens": 56,
-                "completion_tokens": 31,
-                "total_tokens": 87
-            }
-        }
-        """.trimIndent()
-
-        private val errorApiResponse = """
-        {
-            "error": {
-                "message": "Invalid API key provided",
-                "type": "invalid_request_error",
-                "code": "invalid_api_key"
-            }
-        }
-        """.trimIndent()
     }
 }

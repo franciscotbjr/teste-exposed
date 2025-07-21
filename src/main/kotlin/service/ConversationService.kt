@@ -96,37 +96,8 @@ class ConversationService(
             return "Nenhuma mensagem encontrada para sumarizar."
         }
 
-        // Por enquanto, vamos criar um resumo mockado
-        // Na implementação final, isso será substituído por uma chamada real à API de sumarização
-        val messageCount = messages.size
-        val userMessages = messages.count { it.role == Role.USER }
-        val aiMessages = messages.count { it.role == Role.ASSISTANT }
-
-        // Simular resumo gerado
-        val summary = """
-## Resumo da Conversa
-
-**Estatísticas:**
-- Total de mensagens: $messageCount
-- Mensagens do usuário: $userMessages  
-- Respostas da IA: $aiMessages
-
-**Resumo do conteúdo:**
-${if (messages.isNotEmpty()) {
-    val firstUserMessage = messages.firstOrNull { it.role == Role.USER }?.content ?: ""
-    val lastUserMessage = messages.lastOrNull { it.role == Role.USER }?.content ?: ""
-    
-    "A conversa iniciou com: \"${firstUserMessage.take(100)}...\"\n" +
-    if (firstUserMessage != lastUserMessage) {
-        "E a última interação foi sobre: \"${lastUserMessage.take(100)}...\"\n"
-    } else ""
-} else "Não há mensagens para resumir."}
-
-**Tópicos principais discutidos:**
-- Interação com IA conversacional
-- ${messageCount} trocas de mensagens realizadas
-- Conversa ${if (messageCount > 10) "extensa" else "concisa"} com múltiplos pontos abordados
-        """.trimIndent()
+        // Chamar a API DeepSeek real para sumarização
+        val (summary, _) = aiService.summarizeConversation(messages)
 
         return summary
     }
@@ -136,16 +107,34 @@ ${if (messages.isNotEmpty()) {
         tokensUsed: Int = 0,
         summaryMethod: String = "deepseek"
     ): ConversationSummarization {
-        // Gerar o resumo
-        val summary = summarizeConversation(conversationId)
+        val messages = messageRepository.findByConversationId(conversationId)
+
+        if (messages.isEmpty()) {
+            throw IllegalArgumentException("Conversa não possui mensagens para sumarizar.")
+        }
+
+        // Chamar a API DeepSeek real e capturar a resposta bruta
+        val (summary, rawResponse) = aiService.summarizeConversation(messages)
+
+        // Armazenar a resposta bruta da API para auditoria
+        apiRawResponseRepository.create(conversationId, rawResponse)
+
+        // Calcular tokens reais baseados no conteúdo da sumarização
+        val calculatedTokens = calculateTokensForText(summary)
 
         // Persistir a sumarização
         return conversationSummarizationRepository.create(
             originConversationId = conversationId,
             summary = summary,
-            tokensUsed = tokensUsed,
+            tokensUsed = calculatedTokens,
             summaryMethod = summaryMethod
         )
+    }
+
+    private fun calculateTokensForText(text: String): Int {
+        // Estimativa básica de tokens (aproximadamente 1 token por 4 caracteres para inglês/português)
+        // Esta é uma estimativa conservadora - em produção seria ideal usar uma biblioteca específica
+        return (text.length / 4.0).toInt()
     }
 
     fun getConversationSummaries(conversationId: UUID, includeInactive: Boolean = false): List<ConversationSummarization> {

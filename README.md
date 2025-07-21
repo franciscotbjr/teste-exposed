@@ -399,3 +399,444 @@ Este projeto está licenciado sob a [MIT License](LICENSE).
 ---
 
 **HexaSilith Chat** - Conversas inteligentes com tecnologia moderna 🚀
+
+## 📊 Diagramas de Sequência - Fluxos Implementados
+
+Esta seção documenta todos os fluxos de funcionamento implementados no HexaSilith Chat através de diagramas de sequência detalhados.
+
+### 💬 Fluxo Principal de Chat
+
+#### 1. Envio de Mensagem do Usuário
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant IC as IntegratedMainController
+    participant CS as ConversationService
+    participant MR as MessageRepository
+    participant AS as AIService
+    participant API as DeepSeek API
+    participant RR as ApiRawResponseRepository
+    
+    U->>IC: Digite mensagem + Enter
+    IC->>IC: Validar entrada não vazia
+    IC->>IC: Calcular tokens estimados
+    IC->>IC: Atualizar contador de tokens
+    IC->>IC: Criar mensagem do usuário na UI
+    
+    IC->>CS: sendMessage(conversationId, userMessage)
+    CS->>MR: create(conversationId, USER, userMessage)
+    CS->>MR: findByConversationId(conversationId)
+    MR-->>CS: List<Message> history
+    
+    CS->>AS: chatCompletion(history)
+    AS->>AS: Formatar mensagens para API
+    AS->>API: POST /v1/chat/completions
+    API-->>AS: JSON response
+    AS->>AS: Parse da resposta JSON
+    AS-->>CS: Pair(aiResponse, rawResponse)
+    
+    CS->>RR: create(conversationId, rawResponse)
+    CS->>MR: create(conversationId, ASSISTANT, aiResponse)
+    CS-->>IC: aiResponse
+    
+    IC->>IC: Calcular tokens da resposta IA
+    IC->>IC: Atualizar contador total
+    IC->>IC: Criar mensagem da IA na UI
+    IC->>IC: Scroll automático para final
+```
+
+#### 2. Criação e Carregamento de Conversas
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant IC as IntegratedMainController
+    participant CS as ConversationService
+    participant CR as ConversationRepository
+    participant MR as MessageRepository
+    participant DC as DataConverter
+    
+    Note over U,DC: Criação de Nova Conversa
+    U->>IC: Clica "Nova Conversa"
+    IC->>CS: createConversation("Nova conversa")
+    CS->>CS: generateTitleForConversation("Nova conversa")
+    CS->>CR: create(title)
+    CR-->>CS: Conversation
+    CS-->>IC: Conversation
+    IC->>DC: toConversationItem(conversation)
+    DC-->>IC: ConversationItem
+    IC->>IC: Adicionar à lista UI
+    IC->>IC: Selecionar nova conversa
+    
+    Note over U,DC: Carregamento de Conversa Existente
+    U->>IC: Seleciona conversa na lista
+    IC->>IC: selectConversation(conversationItem)
+    IC->>CS: getMessages(UUID.fromString(conversationId))
+    CS->>MR: findByConversationId(conversationId)
+    MR-->>CS: List<Message>
+    CS-->>IC: List<Message>
+    IC->>DC: toChatMessages(messages)
+    DC-->>IC: List<ChatMessage>
+    IC->>IC: displayMessages(chatMessages)
+    IC->>IC: Calcular tokens totais
+    IC->>IC: Atualizar contador na UI
+```
+
+### 📝 Fluxo de Sumarização de Conversas
+
+#### 3. Processo Completo de Sumarização
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant IC as IntegratedMainController
+    participant SMC as SummaryModalController
+    participant CS as ConversationService
+    participant AS as AIService
+    participant API as DeepSeek API
+    participant CSR as ConversationSummarizationRepository
+    participant RR as ApiRawResponseRepository
+    
+    Note over U,RR: Fase 1: Iniciação e Confirmação
+    U->>IC: Clica botão "📝 Resumir"
+    IC->>IC: Verificar conversa selecionada
+    IC->>IC: Abrir modal de confirmação
+    IC->>IC: Exibir estatísticas (tokens, %)
+    U->>IC: Confirma sumarização
+    IC->>IC: Fechar modal confirmação
+    
+    Note over U,RR: Fase 2: Abertura Modal e Inicialização Assíncrona
+    IC->>IC: Carregar FXML summary-modal
+    IC->>SMC: setModalStage(stage)
+    IC->>SMC: setConversationService(service)
+    IC->>SMC: setOnNewConversationCallback()
+    IC->>IC: modal.show() - Exibe imediatamente
+    
+    IC->>SMC: startSummarizationAsync(conversationId)
+    SMC->>SMC: showProgressState()
+    SMC->>SMC: Exibir ProgressIndicator
+    SMC->>SMC: Desabilitar botões
+    
+    Note over U,RR: Fase 3: Processamento Assíncrono
+    SMC->>SMC: updateProgress("Coletando mensagens...")
+    SMC->>CS: createConversationSummary(conversationId)
+    CS->>CS: Validar conversa não vazia
+    
+    SMC->>SMC: updateProgress("Conectando com API DeepSeek...")
+    CS->>AS: summarizeConversation(messages)
+    AS->>AS: Formatar conversa para contexto IA
+    AS->>AS: Criar prompt especializado em português
+    AS->>API: POST /v1/chat/completions (sumarização)
+    API-->>AS: JSON response com resumo
+    AS->>AS: Parse do resumo
+    AS-->>CS: Pair(summary, rawResponse)
+    
+    SMC->>SMC: updateProgress("Processando resumo...")
+    CS->>RR: create(conversationId, rawResponse)
+    CS->>CS: calculateTokensForText(summary)
+    CS->>CSR: create(originId, summary, tokens, "deepseek")
+    CSR-->>CS: ConversationSummarization
+    CS-->>SMC: ConversationSummarization
+    
+    Note over U,RR: Fase 4: Exibição do Resultado
+    SMC->>SMC: showSummaryResult(summarization)
+    SMC->>SMC: Limpar ProgressIndicator
+    SMC->>SMC: Criar MarkdownView
+    SMC->>SMC: Renderizar resumo formatado
+    SMC->>SMC: Atualizar informações (data, tokens, método)
+    SMC->>SMC: Reabilitar botões
+    SMC->>SMC: Scroll para topo
+    SMC-->>U: Resumo completo visível
+```
+
+#### 4. Tratamento de Erros na Sumarização
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant SMC as SummaryModalController
+    participant CS as ConversationService
+    participant AS as AIService
+    participant API as DeepSeek API
+    
+    Note over U,API: Cenário de Erro
+    U->>SMC: Inicia sumarização
+    SMC->>CS: createConversationSummary(conversationId)
+    CS->>AS: summarizeConversation(messages)
+    AS->>API: POST /v1/chat/completions
+    API-->>AS: HTTP Error / Timeout / API Limit
+    AS-->>CS: Exception
+    CS-->>SMC: Exception
+    
+    SMC->>SMC: showError(errorMessage)
+    SMC->>SMC: Limpar ProgressIndicator
+    SMC->>SMC: Criar interface de erro
+    SMC->>SMC: Exibir ícone ⚠️
+    SMC->>SMC: Mostrar mensagem do erro
+    SMC->>SMC: Criar botão "🔄 Tentar Novamente"
+    SMC->>SMC: Desabilitar botões não essenciais
+    
+    Note over U,API: Retry do Usuário
+    U->>SMC: Clica "Tentar Novamente"
+    SMC->>SMC: startSummarizationAsync(conversationId)
+    Note over SMC: Reinicia processo completo
+```
+
+### 🔄 Fluxos de Gerenciamento de Tokens
+
+#### 5. Monitoramento de Tokens em Tempo Real
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant IC as IntegratedMainController
+    participant TA as TextArea
+    participant TL as TokenLabel
+    participant Alert as TokenAlert
+    
+    Note over U,Alert: Digitação com Preview
+    U->>TA: Digite caracteres
+    TA->>IC: textProperty.addListener()
+    IC->>IC: updateInputTokenPreview(newValue)
+    IC->>IC: estimateTokens(inputText)
+    IC->>IC: totalTokensPreview = current + input
+    IC->>TL: text = "current+input/limit"
+    
+    alt Se exceder limite
+        IC->>TL: styleClass.add("token-count-exceeded")
+        IC->>TL: Cor vermelha
+    else Se próximo do limite (80%)
+        IC->>TL: styleClass.add("token-count-warning")  
+        IC->>TL: Cor amarela
+    else Normal
+        IC->>TL: styleClass.add("token-count")
+        IC->>TL: Cor normal
+    end
+    
+    Note over U,Alert: Envio de Mensagem
+    U->>IC: Envia mensagem
+    IC->>IC: Calcular tokens reais
+    IC->>IC: currentTokenCount += messageTokens
+    IC->>IC: updateTokenCountLabel()
+    
+    alt Se atingir threshold (80%)
+        IC->>Alert: showTokenWarningAlert()
+        IC->>Alert: isVisible = true
+        IC->>Alert: Exibir porcentagem e botão resumir
+    end
+```
+
+#### 6. Sistema de Alertas de Token
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant IC as IntegratedMainController
+    participant Alert as TokenLimitAlert
+    participant SMC as SummaryModalController
+    
+    Note over U,SMC: Ativação do Alerta
+    IC->>IC: currentTokenCount >= tokenWarningThreshold
+    IC->>Alert: showTokenWarningAlert()
+    Alert->>Alert: isVisible = true, isManaged = true
+    Alert->>Alert: Calcular porcentagem
+    Alert->>Alert: Atualizar mensagem: "Usando X% dos tokens"
+    Alert-->>U: Alerta visível na interface
+    
+    Note over U,SMC: Ação do Usuário no Alerta
+    alt Usuário clica "Resumir Agora"
+        U->>Alert: Clica alertSummarizeButton
+        Alert->>IC: summarizeConversation()
+        IC->>SMC: Iniciar fluxo de sumarização
+        Note over SMC: Processo completo de sumarização
+        IC->>Alert: dismissTokenLimitAlert()
+        Alert->>Alert: isVisible = false
+    else Usuário clica "Dispensar"
+        U->>Alert: Clica dismissAlertButton
+        Alert->>IC: dismissTokenLimitAlert()
+        Alert->>Alert: isVisible = false
+    end
+```
+
+### 🎨 Fluxo de Renderização de Markdown
+
+#### 7. Processamento e Exibição de Conteúdo Formatado
+```mermaid
+sequenceDiagram
+    participant SMC as SummaryModalController
+    participant MV as MarkdownView
+    participant MP as MarkdownParser
+    participant Elements as MarkdownElements
+    participant UI as JavaFX_UI
+    
+    Note over SMC,UI: Renderização do Resumo
+    SMC->>MV: setMarkdown(summary, isUserMessage=false)
+    MV->>MV: this.isUserMessage = false
+    MV->>MV: children.clear()
+    
+    MV->>MP: parseMarkdown(summary)
+    MP->>MP: Processar ## Resumo da Conversa
+    MP->>MP: Processar ### 📊 Estatísticas
+    MP->>MP: Processar ### 🎯 Tópicos Principais
+    MP->>MP: Processar ### 💬 Resumo do Conteúdo
+    MP->>MP: Processar ### ✨ Pontos-Chave
+    MP->>MP: Processar listas e parágrafos
+    MP-->>MV: List<MarkdownElement>
+    
+    loop Para cada elemento
+        MV->>Elements: renderElement(element)
+        alt Header
+            Elements->>Elements: renderHeader() com getTextColor()
+            Elements->>Elements: DARKSLATEGRAY para sumarização
+        else Paragraph
+            Elements->>Elements: renderParagraph() com inline elements
+        else UnorderedList/OrderedList
+            Elements->>Elements: renderList() com getTextColor()
+        else CodeBlock
+            Elements->>Elements: renderCodeBlock()
+        end
+        Elements-->>MV: JavaFX Node
+        MV->>UI: children.add(node)
+    end
+    
+    MV->>MV: applyMessageStyle()
+    MV->>UI: styleClass.add("ai-markdown-view")
+```
+
+### 💾 Fluxos de Persistência e Recuperação
+
+#### 8. Ciclo Completo de Persistência de Sumarização
+```mermaid
+sequenceDiagram
+    participant CS as ConversationService
+    participant CSR as ConversationSummarizationRepository
+    participant DB as SQLite_Database
+    participant Flyway as FlywayMigration
+    
+    Note over CS,Flyway: Preparação do Schema
+    Flyway->>DB: V5__Create_conversation_summarization_table.sql
+    DB->>DB: CREATE TABLE conversations_summarizations
+    DB->>DB: CREATE INDEXes para performance
+    
+    Note over CS,Flyway: Criação de Sumarização
+    CS->>CSR: create(originId, summary, tokens, method)
+    CSR->>CSR: Gerar UUID para id
+    CSR->>CSR: timestamp = LocalDateTime.now()
+    CSR->>DB: INSERT INTO conversations_summarizations
+    DB-->>CSR: Linha inserida
+    CSR->>CSR: Mapear ResultRow para ConversationSummarization
+    CSR-->>CS: ConversationSummarization
+    
+    Note over CS,Flyway: Recuperação de Sumarizações
+    CS->>CSR: findByOriginConversationId(conversationId)
+    CSR->>DB: SELECT * WHERE origin_conversation_id = ?
+    CSR->>DB: AND is_active = 1 ORDER BY updated_at
+    DB-->>CSR: ResultSet
+    CSR->>CSR: Mapear cada linha para ConversationSummarization
+    CSR-->>CS: List<ConversationSummarization>
+    
+    Note over CS,Flyway: Desativação (Soft Delete)
+    CS->>CSR: deactivate(summaryId)
+    CSR->>DB: UPDATE SET is_active = 0 WHERE id = ?
+    DB-->>CSR: Rows affected
+    CSR-->>CS: Boolean success
+```
+
+#### 9. Carregamento Inicial da Aplicação
+```mermaid
+sequenceDiagram
+    participant Main as Main.kt
+    participant JavaFXApp as JavaFXApp
+    participant Config as AppConfig
+    participant DB as DatabaseConfig
+    participant Flyway as Flyway
+    participant IC as IntegratedMainController
+    participant Services as Services
+    
+    Note over Main,Services: Inicialização da Aplicação
+    Main->>JavaFXApp: launch()
+    JavaFXApp->>Config: loadConfiguration()
+    Config->>Config: Carregar application.conf
+    Config-->>JavaFXApp: Configurações
+    
+    JavaFXApp->>DB: configureDatabaseAndRunMigrations()
+    DB->>DB: Configurar HikariCP
+    DB->>Flyway: Flyway.configure().load()
+    Flyway->>Flyway: migrate() - V1 a V5
+    Flyway-->>DB: Schema atualizado
+    DB-->>JavaFXApp: Database pronto
+    
+    JavaFXApp->>Services: Criar instâncias dos Services
+    Services->>Services: ConversationService(repositories...)
+    Services->>Services: AIService(httpClient, apiKey)
+    Services-->>JavaFXApp: Services configurados
+    
+    JavaFXApp->>IC: IntegratedMainController(conversationService)
+    JavaFXApp->>JavaFXApp: Carregar FXML main-view
+    JavaFXApp->>IC: initialize()
+    IC->>IC: setupConversationList()
+    IC->>IC: setupMessageInput() 
+    IC->>IC: setupButtons()
+    IC->>IC: setupSummarizationFeatures()
+    IC->>IC: loadConversations() - Async
+    IC-->>JavaFXApp: Interface pronta
+    
+    JavaFXApp-->>Main: Aplicação iniciada
+```
+
+### 🔄 Fluxo de Nova Conversa a partir de Resumo
+
+#### 10. Criação de Conversa Baseada em Sumarização
+```mermaid
+sequenceDiagram
+    participant U as Usuário
+    participant SMC as SummaryModalController
+    participant IC as IntegratedMainController
+    participant CI as ConversationItem
+    participant CM as ChatMessage
+    participant UI as Interface
+    
+    Note over U,UI: Processo de Nova Conversa
+    U->>SMC: Clica "🆕 Nova Conversa"
+    SMC->>SMC: showNewConversationConfirmation()
+    SMC->>SMC: Abrir modal de confirmação
+    SMC->>SMC: Exibir informações sobre nova conversa
+    U->>SMC: Confirma criação
+    SMC->>SMC: Fechar confirmação
+    SMC->>SMC: createNewConversation()
+    SMC->>IC: onNewConversationCallback.invoke()
+    
+    IC->>IC: createNewConversationFromSummary()
+    IC->>IC: Verificar currentSummary disponível
+    IC->>CI: Criar ConversationItem mockado
+    CI->>CI: id = UUID.randomUUID()
+    CI->>CI: title = "Nova conversa baseada em resumo"
+    CI->>CI: lastMessageTime = now()
+    
+    IC->>IC: conversations.add(0, newConversationItem)
+    IC->>IC: conversationList.selectionModel.select(0)
+    IC->>IC: messagesContainer.children.clear()
+    
+    IC->>CM: Criar ChatMessage inicial
+    CM->>CM: content = "**Contexto da conversa anterior:**\n\n$summary\n\n---\n\n*Nova conversa iniciada...*"
+    CM->>CM: isUser = false
+    CM->>CM: timestamp = now()
+    
+    IC->>IC: createMessageBox(initialMessage)
+    IC->>UI: messagesContainer.children.add(messageBox)
+    IC->>IC: Calcular tokens da mensagem inicial
+    IC->>IC: updateTokenCountLabel()
+    IC->>IC: currentSummary = null
+    
+    SMC->>SMC: closeModal()
+    IC->>IC: showInfoMessage("Nova conversa criada com base no resumo!")
+```
+
+---
+
+**💡 Observações sobre os Diagramas:**
+
+1. **Operações Assíncronas**: Fluxos marcados com "Async" são executados em background threads
+2. **Tratamento de Erros**: Cada fluxo principal possui tratamento de exceções correspondente  
+3. **Persistência**: Todas as operações de banco utilizam transações automáticas do Exposed
+4. **UI Threading**: Atualizações de interface sempre executadas no JavaFX Application Thread
+5. **Token Management**: Cálculos executados localmente para performance, validação na API
+
+Estes diagramas documentam o estado atual da implementação após conclusão do **Passo 6 da Fase 4**, incluindo a integração real com a API DeepSeek e o sistema completo de sumarização assíncrona.
+
+## 🧪 Testes

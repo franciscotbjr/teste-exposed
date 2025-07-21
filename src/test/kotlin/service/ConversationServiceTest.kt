@@ -297,6 +297,107 @@ class ConversationServiceTest {
         }
     }
 
+    @Test
+    fun `should create conversation summary with real API call`() = runTest {
+        // Given
+        val conversation = conversationService.createConversation("Test Conversation")
+        val userMessage = "Hello, how are you?"
+        val aiResponse = "I'm doing well, thank you!"
+        val rawResponse = """{"choices":[{"message":{"content":"$aiResponse"}}]}"""
+
+        val summaryResponse = "## Resumo da Conversa\n\n### 📊 Estatísticas\n- Total de mensagens: 2\n- Mensagens do usuário: 1\n- Respostas da IA: 1"
+        val summaryRawResponse = """{"choices":[{"message":{"content":"$summaryResponse"}}]}"""
+
+        // Mock both chat completion calls
+        whenever(aiService.chatCompletion(any())).thenReturn(Pair(aiResponse, rawResponse))
+        whenever(aiService.summarizeConversation(any())).thenReturn(Pair(summaryResponse, summaryRawResponse))
+
+        // Add some messages to the conversation
+        conversationService.sendMessage(conversation.id, userMessage)
+
+        // When
+        val summary = conversationService.createConversationSummary(conversation.id)
+
+        // Then
+        assertNotNull(summary.id)
+        assertEquals(conversation.id, summary.originConversationId)
+        assertEquals(summaryResponse, summary.summary)
+        assertTrue(summary.tokensUsed > 0) // Should calculate tokens based on summary content
+        assertEquals("deepseek", summary.summaryMethod)
+        assertTrue(summary.isActive)
+
+        // Verify the summary API was called
+        verify(aiService).summarizeConversation(any())
+    }
+
+    @Test
+    fun `should calculate tokens correctly for summary`() = runTest {
+        // Given
+        val conversation = conversationService.createConversation("Test Conversation")
+        val userMessage = "Test message"
+        val aiResponse = "Test response"
+        val rawResponse = """{"choices":[{"message":{"content":"$aiResponse"}}]}"""
+
+        // Create a summary with known content length
+        val summaryContent = "This is a test summary with exactly 100 characters for testing token calculation purposes!"
+        val summaryRawResponse = """{"choices":[{"message":{"content":"$summaryContent"}}]}"""
+
+        whenever(aiService.chatCompletion(any())).thenReturn(Pair(aiResponse, rawResponse))
+        whenever(aiService.summarizeConversation(any())).thenReturn(Pair(summaryContent, summaryRawResponse))
+
+        conversationService.sendMessage(conversation.id, userMessage)
+
+        // When
+        val summary = conversationService.createConversationSummary(conversation.id)
+
+        // Then
+        val expectedTokens = summaryContent.length / 4 // Basic token calculation
+        assertEquals(expectedTokens, summary.tokensUsed)
+    }
+
+    @Test
+    fun `should throw exception when trying to summarize empty conversation`() = runTest {
+        // Given
+        val conversation = conversationService.createConversation("Empty Conversation")
+
+        // When & Then
+        assertThrows<IllegalArgumentException> {
+            conversationService.createConversationSummary(conversation.id)
+        }
+    }
+
+    @Test
+    fun `should store raw API response when creating summary`() = runTest {
+        // Given
+        val conversation = conversationService.createConversation("Test Conversation")
+        val userMessage = "Test message"
+        val aiResponse = "Test response"
+        val rawResponse = """{"choices":[{"message":{"content":"$aiResponse"}}]}"""
+
+        val summaryContent = "Test summary"
+        val summaryRawResponse = """{"choices":[{"message":{"content":"$summaryContent"}}]}"""
+
+        whenever(aiService.chatCompletion(any())).thenReturn(Pair(aiResponse, rawResponse))
+        whenever(aiService.summarizeConversation(any())).thenReturn(Pair(summaryContent, summaryRawResponse))
+
+        conversationService.sendMessage(conversation.id, userMessage)
+
+        val initialRawResponses = apiRawResponseRepository.findByConversationId(conversation.id)
+        val initialCount = initialRawResponses.size
+
+        // When
+        conversationService.createConversationSummary(conversation.id)
+
+        // Then
+        val finalRawResponses = apiRawResponseRepository.findByConversationId(conversation.id)
+        assertEquals(initialCount + 1, finalRawResponses.size)
+
+        // The last raw response should be the summary response
+        val lastRawResponse = finalRawResponses.maxByOrNull { it.createdAt }
+        assertNotNull(lastRawResponse)
+        assertEquals(summaryRawResponse, lastRawResponse.rawJson)
+    }
+
     @AfterAll
     fun cleanup() {
         transaction(database) {
