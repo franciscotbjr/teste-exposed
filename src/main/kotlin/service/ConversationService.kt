@@ -182,4 +182,14 @@ class ConversationService(
             false
         }
     }
+
+    fun getAllSummarizations(includeInactive: Boolean = false): List<ConversationSummarization> {
+        return conversationSummarizationRepository.findAll(includeInactive)
+    }
+
+    fun getConversationTitles(): Map<String, String> {
+        return listConversations().associate { 
+            it.id.toString() to (it.title ?: "Conversa sem título")
+        }
+    }
 }

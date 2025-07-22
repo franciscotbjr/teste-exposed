@@ -92,4 +92,27 @@ class ConversationSummarizationRepository(private val database: Database) {
             }
     }
 
+    fun findAll(includeInactive: Boolean = false): List<ConversationSummarization> = transaction(database) {
+        val query = if (includeInactive) {
+            ConversationsSummarizations.selectAll()
+        } else {
+            ConversationsSummarizations.selectAll()
+                .where { ConversationsSummarizations.isActive eq true }
+        }
+
+        query.orderBy(ConversationsSummarizations.createdAt to SortOrder.DESC)
+            .map {
+                ConversationSummarization(
+                    UUID.fromString(it[ConversationsSummarizations.id]),
+                    UUID.fromString(it[ConversationsSummarizations.originConversationId]),
+                    it[ConversationsSummarizations.summary],
+                    it[ConversationsSummarizations.tokensUsed],
+                    it[ConversationsSummarizations.summaryMethod],
+                    it[ConversationsSummarizations.isActive],
+                    it[ConversationsSummarizations.createdAt],
+                    it[ConversationsSummarizations.updatedAt]
+                )
+            }
+    }
+
 }

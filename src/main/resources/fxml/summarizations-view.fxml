@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.hexasilith.presentation.component.MarkdownView?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <left>
+      <VBox prefWidth="350.0" styleClass="sidebar">
+         <children>
+            <HBox styleClass="sidebar-header">
+               <children>
+                  <Label styleClass="sidebar-title" text="Sumarizações" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="refreshButton" styleClass="refresh-btn" text="🔄" />
+               </children>
+            </HBox>
+            <ListView fx:id="summarizationsList" VBox.vgrow="ALWAYS" />
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox styleClass="content-area">
+         <children>
+            <HBox styleClass="content-header">
+               <children>
+                  <Button fx:id="backButton" styleClass="back-btn" text="← Voltar" />
+                  <Region HBox.hgrow="ALWAYS" />
+                  <Label fx:id="selectedSummaryInfoLabel" styleClass="content-info" text="Nenhuma sumarização selecionada" />
+               </children>
+            </HBox>
+            <ScrollPane fx:id="contentArea" fitToWidth="true" VBox.vgrow="ALWAYS">
+               <content>
+                  <MarkdownView fx:id="contentContainer" styleClass="summary-content" />
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>

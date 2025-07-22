@@ -55,6 +55,9 @@ class IntegratedMainController(
     private lateinit var summarizeButton: Button
 
     @FXML
+    private lateinit var viewSummarizationsButton: Button
+
+    @FXML
     private lateinit var tokenCountLabel: Label
 
     @FXML
@@ -173,6 +176,7 @@ class IntegratedMainController(
         summarizeButton.setOnAction { summarizeConversation() }
         alertSummarizeButton.setOnAction { summarizeConversation() }
         dismissAlertButton.setOnAction { dismissTokenLimitAlert() }
+        viewSummarizationsButton.setOnAction { openSummarizationsScreen() }
     }
 
     private fun loadConversations() {
@@ -667,6 +671,46 @@ class IntegratedMainController(
         alert.headerText = null
         alert.contentText = message
         alert.showAndWait()
+    }
+
+    /**
+     * Abre a tela de sumarizações em uma nova janela
+     */
+    private fun openSummarizationsScreen() {
+        try {
+            val loader = FXMLLoader(javaClass.getResource("/fxml/summarizations-view.fxml"))
+            val summarizationsController = SummarizationsController(conversationService)
+            loader.setController(summarizationsController)
+            val root: Parent = loader.load()
+
+            val stage = Stage()
+            stage.title = "Sumarizações - DeepSeek AI Chat"
+            stage.scene = Scene(root, 1200.0, 800.0)
+            
+            // Carregar CSS
+            stage.scene.stylesheets.add(javaClass.getResource("/css/main-style.css")?.toExternalForm())
+            
+            // Configurar callbacks
+            summarizationsController.onBackToMainScreen = {
+                stage.close()
+            }
+            
+            summarizationsController.onConversationLinkClick = { conversationId ->
+                // Fechar a tela de sumarizações e navegar para a conversa
+                stage.close()
+                navigateToConversation(conversationId)
+            }
+            
+            // Definir como modal para manter foco
+            val currentStage = viewSummarizationsButton.scene.window as Stage
+            stage.initOwner(currentStage)
+            stage.initModality(Modality.WINDOW_MODAL)
+            
+            stage.show()
+            
+        } catch (e: Exception) {
+            showError("Erro ao abrir tela de sumarizações: ${e.message}")
+        }
     }
 
     /**

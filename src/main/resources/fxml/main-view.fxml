@@ -27,6 +27,8 @@
                   <Region HBox.hgrow="ALWAYS" />
                   <!-- Contador de tokens -->
                   <Label fx:id="tokenCountLabel" styleClass="token-count" text="Tokens: 0" />
+                  <!-- Botão para visualizar sumarizações -->
+                  <Button fx:id="viewSummarizationsButton" styleClass="view-summaries-btn" text="📋 Sumarizações" />
                   <!-- Botão de sumarização -->
                   <Button fx:id="summarizeButton" styleClass="summarize-btn" text="📝 Resumir" />
                </children>
