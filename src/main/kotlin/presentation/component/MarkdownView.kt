@@ -18,6 +18,7 @@ class MarkdownView : VBox() {
 
     private var isUserMessage: Boolean = false
     private val parser = MarkdownParser()
+    private var onConversationLinkClick: ((String) -> Unit)? = null
 
     init {
         spacing = 8.0
@@ -40,6 +41,13 @@ class MarkdownView : VBox() {
 
         // Aplicar estilo baseado no tipo de mensagem
         applyMessageStyle()
+    }
+
+    /**
+     * Define o callback para quando links de conversa são clicados
+     */
+    fun setOnConversationLinkClick(callback: (String) -> Unit) {
+        this.onConversationLinkClick = callback
     }
 
     /**
@@ -263,11 +271,18 @@ class MarkdownView : VBox() {
 
             setOnAction {
                 try {
-                    if (Desktop.isDesktopSupported()) {
-                        Desktop.getDesktop().browse(URI(url))
+                    // Verificar se é um link de conversa
+                    if (url.startsWith("conversation://")) {
+                        val conversationId = url.substring("conversation://".length)
+                        onConversationLinkClick?.invoke(conversationId)
+                    } else {
+                        // Links normais (HTTP, HTTPS, etc.)
+                        if (Desktop.isDesktopSupported()) {
+                            Desktop.getDesktop().browse(URI(url))
+                        }
                     }
                 } catch (e: Exception) {
-                    println("Erro ao abrir link: $url")
+                    println("Erro ao abrir link: $url - ${e.message}")
                 }
             }
         }

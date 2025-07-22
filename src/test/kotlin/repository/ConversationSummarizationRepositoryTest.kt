@@ -13,8 +13,8 @@ import org.junit.jupiter.api.*
 import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -150,6 +150,43 @@ class ConversationSummarizationRepositoryTest {
         assertEquals(tokensUsed, conversationSummarizationFound.tokensUsed)
         assertTrue(conversationSummarizationFound.isActive)
 
+    }
+
+    @Test
+    fun `should find conversation summarization by id`() {
+        // Given
+        val testConversationOrigin = conversationRepository.create("Origin Conversation")
+        val summary = "This is a test summary"
+        val tokensUsed = 150
+        
+        // When
+        val createdSummarization = conversationSummarizationRepository.create(
+            testConversationOrigin.id,
+            summary,
+            tokensUsed
+        )
+        
+        val foundSummarization = conversationSummarizationRepository.findById(createdSummarization.id)
+        
+        // Then
+        assertNotNull(foundSummarization)
+        assertEquals(createdSummarization.id, foundSummarization.id)
+        assertEquals(summary, foundSummarization.summary)
+        assertEquals(tokensUsed, foundSummarization.tokensUsed)
+        assertEquals(testConversationOrigin.id, foundSummarization.originConversationId)
+        assertTrue(foundSummarization.isActive)
+    }
+
+    @Test
+    fun `should return null when summarization not found by id`() {
+        // Given
+        val nonExistentId = UUID.randomUUID()
+        
+        // When
+        val foundSummarization = conversationSummarizationRepository.findById(nonExistentId)
+        
+        // Then
+        assertNull(foundSummarization)
     }
 
     @AfterAll

@@ -22,7 +22,25 @@ class ConversationRepository(private val database: Database) {
         }.let {
             Conversation(
                 id = UUID.fromString(it[Conversations.id]),
-                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
+                conversationSummarizationId = it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) },
+                title = it[Conversations.title],
+                createdAt = it[Conversations.createdAt],
+                updatedAt = it[Conversations.updatedAt]
+            )
+        }
+    }
+
+    fun createWithSummarization(title: String, conversationSummarizationId: UUID): Conversation = transaction(database) {
+        Conversations.insert {
+            it[this.id] = UUID.randomUUID().toString()
+            it[this.conversationSummarizationId] = conversationSummarizationId.toString()
+            it[this.title] = title
+            it[this.createdAt] = LocalDateTime.now()
+            it[this.updatedAt] = LocalDateTime.now()
+        }.let {
+            Conversation(
+                id = UUID.fromString(it[Conversations.id]),
+                conversationSummarizationId = UUID.fromString(it[Conversations.conversationSummarizationId]!!),
                 title = it[Conversations.title],
                 createdAt = it[Conversations.createdAt],
                 updatedAt = it[Conversations.updatedAt]
@@ -34,7 +52,7 @@ class ConversationRepository(private val database: Database) {
         Conversations.selectAll().map {
             Conversation(
                 UUID.fromString(it[Conversations.id]),
-                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
+                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) },
                 it[Conversations.title],
                 it[Conversations.createdAt],
                 it[Conversations.updatedAt]
@@ -54,7 +72,7 @@ class ConversationRepository(private val database: Database) {
             .where { Conversations.id eq id.toString() }.singleOrNull()?.let {
             Conversation(
                 UUID.fromString(it[Conversations.id]),
-                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) } ?: null,
+                it[Conversations.conversationSummarizationId]?.let { UUID.fromString(it) },
                 it[Conversations.title],
                 it[Conversations.createdAt],
                 it[Conversations.updatedAt]

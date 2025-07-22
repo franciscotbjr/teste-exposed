@@ -149,6 +149,41 @@ class ConversationRepositoryTest {
         assertTrue(conversations.isEmpty())
     }
 
+    @Test
+    fun `should create conversation with summarization`() {
+        // Given
+        val summarizationId = UUID.randomUUID()
+        val title = "Test Conversation with Summarization"
+
+        // When
+        val conversation = conversationRepository.createWithSummarization(title, summarizationId)
+
+        // Then
+        assertNotNull(conversation)
+        assertEquals(title, conversation.title)
+        assertEquals(summarizationId, conversation.conversationSummarizationId)
+        assertNotNull(conversation.id)
+        assertNotNull(conversation.createdAt)
+        assertNotNull(conversation.updatedAt)
+    }
+
+    @Test
+    fun `should find conversation with summarization by id`() {
+        // Given
+        val summarizationId = UUID.randomUUID()
+        val title = "Test Conversation with Summarization"
+        val createdConversation = conversationRepository.createWithSummarization(title, summarizationId)
+
+        // When
+        val foundConversation = conversationRepository.findById(createdConversation.id)
+
+        // Then
+        assertNotNull(foundConversation)
+        assertEquals(createdConversation.id, foundConversation.id)
+        assertEquals(title, foundConversation.title)
+        assertEquals(summarizationId, foundConversation.conversationSummarizationId)
+    }
+
     @AfterAll
     fun cleanup() {
         transaction(database) {

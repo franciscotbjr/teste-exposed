@@ -265,6 +265,9 @@ class IntegratedMainController(
             // MarkdownView para renderizar conteúdo Markdown
             val markdownView = MarkdownView()
             markdownView.setMarkdown(message.content, isUserMessage = true)
+            markdownView.setOnConversationLinkClick { conversationId ->
+                navigateToConversation(conversationId)
+            }
             markdownView.prefWidth = 600.0
             markdownView.maxWidth = 600.0
 
@@ -296,6 +299,9 @@ class IntegratedMainController(
             // MarkdownView para renderizar conteúdo Markdown
             val markdownView = MarkdownView()
             markdownView.setMarkdown(message.content, isUserMessage = false)
+            markdownView.setOnConversationLinkClick { conversationId ->
+                navigateToConversation(conversationId)
+            }
             markdownView.prefWidth = 600.0
             markdownView.maxWidth = 600.0
 
@@ -551,6 +557,9 @@ class IntegratedMainController(
             controller.setOnNewConversationCallback {
                 createNewConversationFromSummary()
             }
+            controller.setOnConversationNavigationCallback { conversationId ->
+                navigateToConversation(conversationId)
+            }
 
             // Exibir modal imediatamente e iniciar sumarização assíncrona
             modalStage.show() // Usar show() em vez de showAndWait() para não bloquear
@@ -567,47 +576,19 @@ class IntegratedMainController(
     }
 
     private fun createNewConversationFromSummary() {
-        val summary = currentSummary ?: return
-
         try {
-            // Simular criação de nova conversa sem persistência real
+            // Recarregar lista de conversas para incluir a nova conversa criada
+            loadConversations()
+            
             Platform.runLater {
-                // Criar um item de conversa mockado
-                val newConversationId = java.util.UUID.randomUUID().toString()
-                val newConversationItem = ConversationItem(
-                    id = newConversationId,
-                    title = "Nova conversa baseada em resumo",
-                    lastMessageTime = LocalDateTime.now()
-                )
-
-                // Adicionar à lista de conversas (apenas em memória)
-                conversations.add(0, newConversationItem)
-                conversationList.selectionModel.select(0)
-
-                // Limpar área de mensagens e mostrar mensagem inicial com resumo
-                messagesContainer.children.clear()
-
-                // Criar mensagem inicial com o resumo como contexto
-                val initialMessage = ChatMessage(
-                    content = "**Contexto da conversa anterior:**\n\n$summary\n\n---\n\n*Nova conversa iniciada com base no resumo acima.*",
-                    isUser = false,
-                    timestamp = LocalDateTime.now()
-                )
-
-                val initialMessageBox = createMessageBox(initialMessage)
-                messagesContainer.children.add(initialMessageBox)
-
-                // Resetar contador de tokens
-                currentTokenCount = estimateTokens(initialMessage.content)
-                updateTokenCountLabel()
-
-                // Limpar resumo atual
-                currentSummary = null
-
+                // Selecionar a primeira conversa (mais recente) que deve ser a nova conversa criada
+                if (conversations.isNotEmpty()) {
+                    conversationList.selectionModel.select(0)
+                    selectConversation(conversations[0])
+                }
+                
                 // Feedback visual
                 showInfoMessage("Nova conversa criada com base no resumo!")
-
-                println("Nova conversa criada mockada com ID: $newConversationId")
             }
         } catch (e: Exception) {
             Platform.runLater {
@@ -686,5 +667,53 @@ class IntegratedMainController(
         alert.headerText = null
         alert.contentText = message
         alert.showAndWait()
+    }
+
+    /**
+     * Navega para uma conversa específica com base no ID fornecido
+     */
+    private fun navigateToConversation(conversationId: String) {
+        try {
+            val uuid = UUID.fromString(conversationId)
+            
+            // Buscar a conversa na lista atual
+            val targetConversation = conversations.find { it.id == conversationId }
+            
+            if (targetConversation != null) {
+                // Selecionar a conversa na lista
+                conversationList.selectionModel.select(targetConversation)
+                
+                // Carregar as mensagens da conversa
+                selectConversation(targetConversation)
+                
+                // Feedback visual
+                showInfoMessage("Navegou para conversa: ${targetConversation.title}")
+            } else {
+                // Se não estiver na lista atual, tentar buscar no banco
+                val conversation = conversationService.getConversation(uuid)
+                if (conversation != null) {
+                    // Recarregar a lista de conversas para incluir a conversa alvo
+                    loadConversations()
+                    
+                    Platform.runLater {
+                        // Encontrar e selecionar a conversa após recarregar
+                        val reloadedConversation = conversations.find { it.id == conversationId }
+                        if (reloadedConversation != null) {
+                            conversationList.selectionModel.select(reloadedConversation)
+                            selectConversation(reloadedConversation)
+                            showInfoMessage("Navegou para conversa: ${reloadedConversation.title}")
+                        } else {
+                            showError("Não foi possível carregar a conversa de origem.")
+                        }
+                    }
+                } else {
+                    showError("Conversa de origem não encontrada.")
+                }
+            }
+        } catch (e: IllegalArgumentException) {
+            showError("ID de conversa inválido: $conversationId")
+        } catch (e: Exception) {
+            showError("Erro ao navegar para conversa: ${e.message}")
+        }
     }
 }

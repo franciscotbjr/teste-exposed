@@ -21,6 +21,40 @@ class ConversationService(
         return conversationRepository.create(generateTitleForConversation(title))
     }
 
+    fun createConversationFromSummary(
+        originConversationId: UUID,
+        summarizationId: UUID
+    ): Conversation {
+        // Buscar a conversa original para obter o título
+        val originConversation = conversationRepository.findById(originConversationId)
+            ?: throw IllegalArgumentException("Conversa original não encontrada")
+
+        // Buscar a sumarização
+        val summarization = conversationSummarizationRepository.findById(summarizationId)
+            ?: throw IllegalArgumentException("Sumarização não encontrada")
+
+        // Criar nova conversa com o mesmo título da original e referência à sumarização
+        val newConversation = conversationRepository.createWithSummarization(
+            title = originConversation.title,
+            conversationSummarizationId = summarizationId
+        )
+
+        // Criar a primeira mensagem com o conteúdo da sumarização mais o link para a conversa original
+        val messageContent = """${summarization.summary}
+
+---
+
+*Esta conversa foi iniciada a partir de um resumo. [Ver conversa original](conversation://${originConversationId})*"""
+
+        messageRepository.create(
+            conversationId = newConversation.id,
+            role = Role.ASSISTANT,
+            content = messageContent
+        )
+
+        return newConversation
+    }
+
     fun listConversations(): List<Conversation> {
         return conversationRepository.findAll()
     }

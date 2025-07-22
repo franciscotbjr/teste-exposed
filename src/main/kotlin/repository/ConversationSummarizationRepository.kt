@@ -48,6 +48,23 @@ class ConversationSummarizationRepository(private val database: Database) {
         }
     }
 
+    fun findById(id: UUID): ConversationSummarization? = transaction(database) {
+        ConversationsSummarizations.selectAll()
+            .where { ConversationsSummarizations.id eq id.toString() }
+            .singleOrNull()?.let {
+                ConversationSummarization(
+                    UUID.fromString(it[ConversationsSummarizations.id]),
+                    UUID.fromString(it[ConversationsSummarizations.originConversationId]),
+                    it[ConversationsSummarizations.summary],
+                    it[ConversationsSummarizations.tokensUsed],
+                    it[ConversationsSummarizations.summaryMethod],
+                    it[ConversationsSummarizations.isActive],
+                    it[ConversationsSummarizations.createdAt],
+                    it[ConversationsSummarizations.updatedAt]
+                )
+            }
+    }
+
     fun findByOriginConversationId(originConversationId: UUID, includeInactive: Boolean = false): List<ConversationSummarization> = transaction(database) {
         val query = if (includeInactive) {
             ConversationsSummarizations.selectAll()

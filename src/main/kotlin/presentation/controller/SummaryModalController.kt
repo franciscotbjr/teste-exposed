@@ -45,9 +45,11 @@ class SummaryModalController {
     private var tokensUsed: Int = 0
     private var summaryMethod: String = "deepseek"
     private var onNewConversationCallback: (() -> Unit)? = null
+    private var onConversationNavigationCallback: ((String) -> Unit)? = null
     private lateinit var modalStage: Stage
     private var conversationService: ConversationService? = null
     private var currentConversationId: UUID? = null
+    private var currentSummary: ConversationSummarization? = null
     private var summarizationJob: Job? = null
 
     // Componentes para feedback de progresso
@@ -174,11 +176,16 @@ class SummaryModalController {
         this.summaryText = summarization.summary
         this.tokensUsed = summarization.tokensUsed
         this.summaryMethod = summarization.summaryMethod
+        this.currentSummary = summarization
 
         summaryContent.children.clear()
 
         val markdownView = MarkdownView()
         markdownView.setMarkdown(summarization.summary, isUserMessage = false)
+        markdownView.setOnConversationLinkClick { conversationId ->
+            onConversationNavigationCallback?.invoke(conversationId)
+            closeModal()  // Fechar o modal após navegar
+        }
         markdownView.prefWidth = 750.0
         markdownView.maxWidth = 750.0
 
@@ -242,6 +249,10 @@ class SummaryModalController {
 
     fun setOnNewConversationCallback(callback: () -> Unit) {
         this.onNewConversationCallback = callback
+    }
+
+    fun setOnConversationNavigationCallback(callback: (String) -> Unit) {
+        this.onConversationNavigationCallback = callback
     }
 
     private fun closeModal() {
@@ -357,8 +368,33 @@ class SummaryModalController {
     }
 
     private fun createNewConversation() {
-        onNewConversationCallback?.invoke()
-        closeModal()
+        try {
+            val conversationService = this.conversationService
+                ?: throw IllegalStateException("ConversationService não configurado")
+                
+            val currentConversationId = this.currentConversationId
+                ?: throw IllegalStateException("ID da conversa atual não está disponível")
+                
+            val currentSummary = this.currentSummary
+                ?: throw IllegalStateException("Resumo atual não está disponível")
+
+            // Criar nova conversa baseada na sumarização
+            val newConversation = conversationService.createConversationFromSummary(
+                originConversationId = currentConversationId,
+                summarizationId = currentSummary.id
+            )
+
+            println("Nova conversa criada com sucesso: ${newConversation.id}")
+            
+            // Notificar callback para atualizar a interface principal
+            onNewConversationCallback?.invoke()
+            
+            closeModal()
+            
+        } catch (e: Exception) {
+            showErrorAlert("Erro ao criar nova conversa: ${e.message}")
+            e.printStackTrace()
+        }
     }
 
     private fun copySummaryToClipboard() {

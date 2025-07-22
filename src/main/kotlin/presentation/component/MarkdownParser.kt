@@ -175,7 +175,7 @@ class MarkdownParser {
 
     /**
      * Analisa elementos inline dentro de um texto usando CommonMark spec
-     * Versão simplificada que processa um padrão por vez
+     * Suporta aninhamento de elementos markdown 
      */
     private fun parseInlineElements(text: String): List<InlineElement> {
         val elements = mutableListOf<InlineElement>()
@@ -191,8 +191,37 @@ class MarkdownParser {
                     elements.add(InlineElement.PlainText(plainText))
                 }
 
-                // Adicionar elemento formatado
-                elements.add(match.element)
+                // Para elementos que podem conter outros elementos, processar recursivamente apenas para links
+                when (match.element) {
+                    is InlineElement.ItalicText -> {
+                        // Processar o conteúdo do itálico recursivamente para encontrar links
+                        val nestedElements = parseInlineElements(match.element.text)
+                        val hasLinks = nestedElements.any { it is InlineElement.Link }
+                        if (hasLinks) {
+                            // Se tem links, expandir mantendo a estrutura
+                            elements.addAll(nestedElements)
+                        } else {
+                            // Se não tem links, manter como itálico
+                            elements.add(match.element)
+                        }
+                    }
+                    is InlineElement.BoldText -> {
+                        // Processar o conteúdo do negrito recursivamente para encontrar links
+                        val nestedElements = parseInlineElements(match.element.text)
+                        val hasLinks = nestedElements.any { it is InlineElement.Link }
+                        if (hasLinks) {
+                            // Se tem links, expandir mantendo a estrutura
+                            elements.addAll(nestedElements)
+                        } else {
+                            // Se não tem links, manter como negrito
+                            elements.add(match.element)
+                        }
+                    }
+                    else -> {
+                        // Outros elementos não precisam de processamento recursivo
+                        elements.add(match.element)
+                    }
+                }
 
                 // Continuar com o resto do texto
                 remainingText = remainingText.substring(match.endIndex)
@@ -208,15 +237,20 @@ class MarkdownParser {
 
     /**
      * Encontra o primeiro match de elemento inline no texto
+     * Processa padrões em ordem de precedência, retornando o mais prioritário entre os que ocorrem mais cedo
      */
     private fun findFirstMatch(text: String): InlineMatch? {
         // Padrões em ordem de precedência (mais específicos primeiro)
         val patterns = listOf(
+            // Links [text](url) - PRIMEIRA PRIORIDADE 
+            "\\[([^\\]]+)\\]\\(([^\\)]+)\\)".toRegex() to { match: MatchResult ->
+                InlineElement.Link(match.groupValues[1], match.groupValues[2])
+            },
             // Negrito + Itálico ***text***
             "\\*\\*\\*(.+?)\\*\\*\\*".toRegex() to { match: MatchResult ->
                 InlineElement.BoldItalicText(match.groupValues[1])
             },
-            // Negrito com ** - permite aninhamento de itálico
+            // Negrito com ** 
             "\\*\\*(.+?)\\*\\*".toRegex() to { match: MatchResult ->
                 InlineElement.BoldText(match.groupValues[1])
             },
@@ -224,31 +258,28 @@ class MarkdownParser {
             "__(.+?)__".toRegex() to { match: MatchResult ->
                 InlineElement.BoldText(match.groupValues[1])
             },
-            // Itálico com *
+            // Código inline
+            "`([^`]+)`".toRegex() to { match: MatchResult ->
+                InlineElement.InlineCode(match.groupValues[1])
+            },
+            // Texto tachado
+            "~~(.+?)~~".toRegex() to { match: MatchResult ->
+                InlineElement.StrikeThrough(match.groupValues[1])
+            },
+            // Itálico com * - APÓS links 
             "(?<!\\*)\\*(.+?)\\*(?!\\*)".toRegex() to { match: MatchResult ->
                 InlineElement.ItalicText(match.groupValues[1])
             },
             // Itálico com _
             "(?<!_)_(.+?)_(?!_)".toRegex() to { match: MatchResult ->
                 InlineElement.ItalicText(match.groupValues[1])
-            },
-            // Código inline
-            "`([^`]+)`".toRegex() to { match: MatchResult ->
-                InlineElement.InlineCode(match.groupValues[1])
-            },
-            // Links [text](url)
-            "\\[([^\\]]+)\\]\\(([^\\)]+)\\)".toRegex() to { match: MatchResult ->
-                InlineElement.Link(match.groupValues[1], match.groupValues[2])
-            },
-            // Texto tachado
-            "~~(.+?)~~".toRegex() to { match: MatchResult ->
-                InlineElement.StrikeThrough(match.groupValues[1])
             }
         )
 
-        var earliestMatch: InlineMatch? = null
+        var bestMatch: InlineMatch? = null
+        var bestPriority = Int.MAX_VALUE
 
-        for ((regex, factory) in patterns) {
+        patterns.forEachIndexed { priority, (regex, factory) ->
             val match = regex.find(text)
             if (match != null && match.groupValues.size > 1 && match.groupValues[1].isNotEmpty()) {
                 val inlineMatch = InlineMatch(
@@ -257,13 +288,18 @@ class MarkdownParser {
                     endIndex = match.range.last + 1
                 )
 
-                if (earliestMatch == null || inlineMatch.startIndex < earliestMatch.startIndex) {
-                    earliestMatch = inlineMatch
+                // Priorizar por precedência (índice menor = maior prioridade)
+                // Em caso de empate na posição, usar a prioridade do padrão
+                if (bestMatch == null || 
+                    inlineMatch.startIndex < bestMatch.startIndex ||
+                    (inlineMatch.startIndex == bestMatch.startIndex && priority < bestPriority)) {
+                    bestMatch = inlineMatch
+                    bestPriority = priority
                 }
             }
         }
 
-        return earliestMatch
+        return bestMatch
     }
 
     /**

@@ -398,6 +398,79 @@ class ConversationServiceTest {
         assertEquals(summaryRawResponse, lastRawResponse.rawJson)
     }
 
+    @Test
+    fun `should create conversation from summary`() = runTest {
+        // Given
+        val originConversation = conversationService.createConversation("Original conversation")
+        val userMessage = "Primeira mensagem"
+        val aiResponse = "Resposta do assistente"
+        val rawResponse = """{"choices":[{"message":{"content":"$aiResponse"}}]}"""
+        
+        // Mock responses
+        whenever(aiService.chatCompletion(any())).thenReturn(Pair(aiResponse, rawResponse))
+        
+        // Adicionar mensagens na conversa original
+        conversationService.sendMessage(originConversation.id, userMessage)
+        
+        // Criar sumarização
+        val mockSummary = "## Resumo da Conversa\n\nConversa sobre teste de funcionalidade."
+        val mockRawResponse = """{"choices":[{"message":{"content":"$mockSummary"}}]}"""
+        whenever(aiService.summarizeConversation(any())).thenReturn(Pair(mockSummary, mockRawResponse))
+        
+        val summarization = conversationService.createConversationSummary(originConversation.id)
+        
+        // When
+        val newConversation = conversationService.createConversationFromSummary(
+            originConversationId = originConversation.id,
+            summarizationId = summarization.id
+        )
+        
+        // Then
+        assertNotNull(newConversation)
+        // O título será igual ao título que foi alterado pelo sendMessage (primeira mensagem truncada)
+        val expectedTitle = "Primeira mensagem"
+        assertEquals(expectedTitle, newConversation.title)
+        assertEquals(summarization.id, newConversation.conversationSummarizationId)
+        
+        // Verificar se a primeira mensagem foi criada com o conteúdo da sumarização
+        val messages = messageRepository.findByConversationId(newConversation.id)
+        assertEquals(1, messages.size)
+        assertEquals(Role.ASSISTANT, messages[0].role)
+        assertTrue(messages[0].content.contains(mockSummary))
+        assertTrue(messages[0].content.contains("Esta conversa foi iniciada a partir de um resumo"))
+        assertTrue(messages[0].content.contains("conversation://${originConversation.id}"))
+    }
+
+    @Test
+    fun `should fail to create conversation from summary when origin conversation not found`() = runTest {
+        // Given
+        val nonExistentConversationId = UUID.randomUUID()
+        val validSummarizationId = UUID.randomUUID()
+        
+        // When & Then
+        assertThrows<IllegalArgumentException> {
+            conversationService.createConversationFromSummary(
+                originConversationId = nonExistentConversationId,
+                summarizationId = validSummarizationId
+            )
+        }
+    }
+
+    @Test
+    fun `should fail to create conversation from summary when summarization not found`() = runTest {
+        // Given
+        val originConversation = conversationService.createConversation("Original conversation")
+        val nonExistentSummarizationId = UUID.randomUUID()
+        
+        // When & Then
+        assertThrows<IllegalArgumentException> {
+            conversationService.createConversationFromSummary(
+                originConversationId = originConversation.id,
+                summarizationId = nonExistentSummarizationId
+            )
+        }
+    }
+
     @AfterAll
     fun cleanup() {
         transaction(database) {

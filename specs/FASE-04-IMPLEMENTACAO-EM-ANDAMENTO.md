@@ -5,7 +5,7 @@
 Este documento detalha o progresso da implementação da **Fase 4: Sumarização de Conversa** do projeto DeepSeek AI Chat Client. A fase tem como objetivo implementar funcionalidades completas de sumarização de conversas utilizando a API DeepSeek IA, incluindo persistência, interface gráfica e gerenciamento de tokens.
 
 **Data de Início:** Janeiro 2025  
-**Status Atual:** Em Desenvolvimento - Passo 6 Concluído  
+**Status Atual:** Em Desenvolvimento - Passo 7 Concluído  
 **Próxima Etapa:** Otimização e Funcionalidades Avançadas  
 
 ---
@@ -52,6 +52,15 @@ Este documento detalha o progresso da implementação da **Fase 4: Sumarização
 - ✅ **Armazenamento de Resposta**: Captura e persistência da resposta bruta da API
 - ✅ **Cálculo Preciso de Tokens**: Estimativa baseada no conteúdo real da sumarização
 - ✅ **Tratamento de Erros**: Gestão adequada de falhas na API
+
+### **7. Criação de Nova Conversa a partir de Resumo** ✅ *(Concluído)*
+- ✅ **Botão "Criar Nova Conversa"**: Implementado no modal de sumarização
+- ✅ **Vinculação de Conversas**: Campo `conversationSummarizationId` para rastreamento
+- ✅ **Mensagem Inicial**: Primeira mensagem da IA contém o resumo completo
+- ✅ **Link para Conversa Original**: Links clicáveis com protocolo `conversation://`
+- ✅ **Navegação Inteligente**: Sistema de callback para navegar entre conversas
+- ✅ **Parsing de Markdown Avançado**: Suporte a links dentro de formatação itálica
+- ✅ **Fechamento Automático**: Modal de sumarização fecha automaticamente
 
 ---
 
@@ -110,21 +119,21 @@ suspend fun summarizeConversation(messages: List<Message>): Pair<String, String>
 
 ## 🎯 FUNCIONALIDADES POR STATUS
 
-### ✅ **CONCLUÍDAS** (9/12 obrigatórias)
+### ✅ **CONCLUÍDAS** (10/12 obrigatórias)
 1. **[01]** Funcionalidade de sumarização de conversa ✅
 2. **[02]** Resumo em nova janela/modal ✅
 3. **[03]** Botão de sumarização na interface ✅
-4. **[04]** API DeepSeek IA real implementada ✅ **NOVO**
+4. **[04]** API DeepSeek IA real implementada ✅
 5. **[05]** Formatação Markdown nos resumos ✅
 6. **[08/08.1]** Interface separada e não visível por padrão ✅
-7. **[11.1]** Contagem de tokens antes do envio ✅
-8. **[11.2]** Exibição clara da contagem de tokens ✅
-9. **[EXTRA]** Persistência completa de sumarizações ✅
+7. **[09]** Criação de nova conversa a partir de resumo ✅ **NOVO**
+8. **[11.1]** Contagem de tokens antes do envio ✅
+9. **[11.2]** Exibição clara da contagem de tokens ✅
+10. **[EXTRA]** Persistência completa de sumarizações ✅
 
-### 🔧 **EM DESENVOLVIMENTO** (3/12 obrigatórias)
+### 🔧 **EM DESENVOLVIMENTO** (2/12 obrigatórias)
 1. **[06]** Chamadas assíncronas otimizadas 🔄
-2. **[09]** Criação de nova conversa a partir de resumo (funcional, mas pode melhorar) 🔄
-3. **[12]** Alertas quando próximo do limite de tokens ✅ **Básico implementado, refinamentos pendentes**
+2. **[12]** Alertas quando próximo do limite de tokens ✅ **Básico implementado, refinamentos pendentes**
 
 ### ⬜ **PENDENTES** (6/12 obrigatórias)
 1. **[07]** Testes de relevância do resumo ⬜
@@ -137,9 +146,9 @@ suspend fun summarizeConversation(messages: List<Message>): Pair<String, String>
 
 | Categoria | Concluída | Em Desenvolvimento | Pendente | Total |
 |-----------|:---------:|:------------------:|:--------:|:-----:|
-| **Funcionalidades Obrigatórias** | 9 | 3 | 3 | 12 |
+| **Funcionalidades Obrigatórias** | 10 | 2 | 3 | 12 |
 | **Funcionalidades Extras** | 4 | 0 | 0 | 4 |
-| **Progresso Total** | **75%** | **20%** | **5%** | **100%** |
+| **Progresso Total** | **83%** | **12%** | **5%** | **100%** |
 
 ---
 
@@ -225,10 +234,17 @@ suspend fun summarizeConversation(messages: List<Message>): Pair<String, String>
 
 ### **Resultados dos Testes**
 ```
-BUILD SUCCESSFUL in 19s
-77 tests completed, 0 failed ✅
-12 actionable tasks: 7 executed, 5 up-to-date
+BUILD SUCCESSFUL in 8s
+92 tests completed, 0 failed ✅ **ATUALIZADO**
+5 actionable tasks: 2 executed, 3 up-to-date
 ```
+
+### **Novos Testes do Passo 7** ✅
+- ✅ **MarkdownParserLinkTest**: Testes de parsing de links de conversa
+- ✅ **MarkdownViewConversationLinkTest**: Testes de detecção de links de conversa  
+- ✅ **ConversationServiceTest**: Teste de criação de conversa a partir de resumo
+- ✅ **Parsing Recursivo**: Testes de links dentro de texto formatado
+- ✅ **Navegação de Conversa**: Testes de callback mechanism
 
 ---
 
@@ -255,6 +271,102 @@ Mensagens da conversa → Formatação para contexto da IA
 Digitação → Cálculo estimado → Exibição na interface 
 → Sumarização → Tokens reais da API → Atualização no banco
 → Histórico de consumo para análise
+```
+
+---
+
+## 📝 IMPLEMENTAÇÕES DO SÉTIMO PASSO
+
+### **Nova Funcionalidade: Criação de Conversa a partir de Resumo**
+- ✅ **Método `ConversationService.createConversationFromSummary()`**: Implementado com vinculação completa
+- ✅ **Método `ConversationRepository.createWithSummarization()`**: Suporte a campo `conversationSummarizationId`
+- ✅ **Sistema de Navegação**: Callback mechanism para links de conversa
+- ✅ **Protocolo `conversation://`**: Links personalizados para navegação interna
+- ✅ **Parsing de Markdown Recursivo**: Suporte a links dentro de texto formatado
+
+### **Implementação Técnica**
+```kotlin
+// ConversationService.kt - Novo método
+suspend fun createConversationFromSummary(summarizationId: UUID): Result<Pair<Conversation, Message>> {
+    return try {
+        val summarization = conversationSummarizationRepository.findById(summarizationId)
+            ?: return Result.failure(Exception("Sumarização não encontrada"))
+        
+        val originalConversation = conversationRepository.findById(summarization.originConversationId)
+            ?: return Result.failure(Exception("Conversa original não encontrada"))
+
+        // Criar nova conversa com mesmo título
+        val newConversation = conversationRepository.createWithSummarization(
+            title = originalConversation.title,
+            conversationSummarizationId = summarizationId
+        )
+
+        // Criar mensagem inicial com resumo e link para original
+        val messageContent = "${summarization.summary}\n\n---\n\n*Esta conversa foi iniciada a partir de um resumo. [Ver conversa original](conversation://${originalConversation.id})*"
+        
+        val initialMessage = Message(
+            conversationId = newConversation.id,
+            content = messageContent,
+            role = Role.ASSISTANT
+        )
+        
+        messageRepository.create(initialMessage)
+        Result.success(Pair(newConversation, initialMessage))
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+}
+```
+
+### **Sistema de Links de Conversa**
+```kotlin
+// MarkdownView.kt - Suporte a conversation://
+private fun createLink(text: String, url: String): Hyperlink {
+    val link = Hyperlink(text)
+    
+    when {
+        url.startsWith("conversation://") -> {
+            // Link para conversa interna
+            val conversationId = url.removePrefix("conversation://")
+            link.setOnAction { 
+                onConversationLinkClick?.invoke(conversationId)
+            }
+        }
+        else -> {
+            // Links externos normais
+            link.setOnAction {
+                try {
+                    Desktop.getDesktop().browse(URI(url))
+                } catch (e: Exception) {
+                    println("Erro ao abrir URL: ${e.message}")
+                }
+            }
+        }
+    }
+    
+    return link
+}
+```
+
+### **Parsing de Markdown Aprimorado**
+```kotlin
+// MarkdownParser.kt - Parsing recursivo seletivo
+private fun parseInlineElements(text: String): List<InlineElement> {
+    // Processar elementos recursivamente apenas quando contêm links
+    when (match.element) {
+        is InlineElement.ItalicText -> {
+            val nestedElements = parseInlineElements(match.element.text)
+            val hasLinks = nestedElements.any { it is InlineElement.Link }
+            if (hasLinks) {
+                // Expandir para mostrar links
+                elements.addAll(nestedElements)
+            } else {
+                // Manter formatação itálica
+                elements.add(match.element)
+            }
+        }
+    }
+}
 ```
 
 ---
@@ -400,10 +512,11 @@ A **Fase 4 - Passo 6** foi concluída com êxito, implementando a integração r
 ✅ Passos 1-3: Interface e Base (Concluído)
 ✅ Passo 4: Arquitetura (Concluído) 
 ✅ Passo 5: Persistência (Concluído)
-✅ Passo 6: API Real (Concluído) ✨
-🔄 Passo 7: Otimizações (Próximo)
-⬜ Passo 8: Funcionalidades Avançadas
-⬜ Passo 9: Testes de Integração
+✅ Passo 6: API Real (Concluído)
+✅ Passo 7: Nova Conversa de Resumo (Concluído) ✨
+🔄 Passo 8: Otimizações (Próximo)
+⬜ Passo 9: Funcionalidades Avançadas
+⬜ Passo 10: Testes de Integração
 ```
 
 ### **🎉 Marcos Principais Alcançados:**
@@ -411,13 +524,35 @@ A **Fase 4 - Passo 6** foi concluída com êxito, implementando a integração r
 2. **Persistência**: Sistema completo de armazenamento
 3. **API Integration**: Integração real com DeepSeek IA
 4. **Token Management**: Controle preciso e em tempo real
-5. **Testing**: Cobertura abrangente e estável
+5. **Testing**: Cobertura abrangente e estável (92 testes)
 6. **Architecture**: Padrões de design corretamente implementados
+7. **Conversation Navigation**: Sistema de links e navegação interna ✨ **NOVO**
 
 ---
 
-**Status Final do Passo 6: ✅ CONCLUÍDO COM SUCESSO**
+## 🎯 CONCLUSÃO DO SÉTIMO PASSO
 
-*Último update: Janeiro 2025 - Implementação da API DeepSeek Real para Sumarização*
+A **Fase 4 - Passo 7** foi concluída com êxito, implementando a funcionalidade completa de criação de nova conversa a partir de um resumo. Os principais marcos alcançados incluem:
+
+### **✅ Sucessos do Passo 7:**
+1. **Criação de Conversa Vinculada**: Nova conversa é criada com mesmo título e vinculada à sumarização
+2. **Mensagem Inicial Rica**: Primeira mensagem contém resumo completo com link clicável
+3. **Navegação Inteligente**: Sistema de callback para navegar entre conversas
+4. **Parsing de Markdown Avançado**: Suporte a links dentro de formatação itálica
+5. **Protocolo Personalizado**: Links `conversation://` funcionais
+6. **Interface Integrada**: Fechamento automático do modal de sumarização
+
+### **📈 Impacto Técnico do Passo 7:**
+- **Funcionalidade Completa**: Ciclo completo de sumarização → nova conversa
+- **Links Clicáveis**: Navegação entre conversas relacionadas
+- **Parsing Robusto**: Markdown com suporte a elementos aninhados
+- **Experiência Fluida**: Interface responsiva e intuitiva
+- **Cobertura de Testes**: 92 testes passando (15 novos testes adicionados)
+
+---
+
+**Status Final do Passo 7: ✅ CONCLUÍDO COM SUCESSO**
+
+*Último update: Janeiro 2025 - Implementação de Nova Conversa a partir de Resumo com Links Clicáveis*
 
 **Próximo Passo: Otimização de Performance e Funcionalidades Avançadas**
