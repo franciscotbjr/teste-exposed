@@ -222,10 +222,12 @@ Garantir que o ./gradlew build está gerando a compilação com sucesso.
 Neste passo deverá ser incluído um link na forma de uma mensagem na conversa original que foi sumarizada.
 Como deverá funcionar:
 1) Quando uma Sumarização for criar, uma mensagem deverá ser adicionada à conversa contendo um link para a Sumarização;
-1.1) A Role dessa conversa será "SYSTEM"
+1.1) A Role dessa mensagem será "SYSTEM"
 1.2) Criar um CSS específico para mensagens da Role "SYSTEM" para que sejam diferenciadas das demais mensagens;
 1.3) A mensagem de "SYSTEM" deverá ter um ícone diferente das demais.
 2) Quando o usuário clicar nesse link, ele abrir a tela de sumarizações com a sumarização específica selecionada;
+3) A mensagem "SYSTEM" não será enviada para a API do DeepSeek como aconteceria se fosse uma mensagem de "USER"
+
 
 Garantir que os testes unitários atuais estão rodando.
 Criar novos testes unitários necessários para este sexto passo
