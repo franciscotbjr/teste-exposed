@@ -16,7 +16,7 @@
         10.1 - Criar uma nova entidade de mensagem para o resumo, com um tipo específico que identifique que é um resumo de conversa. ✅
         10.2 - Deve ser criada a persistência do resumo no banco de dados, garantindo que os resumos sejam salvos e possam ser recuperados posteriormente. ✅
         10.3 - A mensagem de resumo deve ser diferenciada visualmente das mensagens normais, utilizando um estilo específico para destacar que é um resumo. ✅
-        10.4 - A mensagem de resumo deve conter um link ou botão que permita ao usuário iniciar uma nova conversa a partir daquele resumo, facilitando a continuidade da interação. ⬜
+        10.4 - A mensagem de resumo deve conter um link ou botão que permita ao usuário iniciar uma nova conversa a partir daquele resumo, facilitando a continuidade da interação. ✅
     11 - O aplicativo deverá ser capaz de calcular a quantidade de tokens utilizados na conversa, tanto para o usuário quanto para a IA, e exibir essa informação ao usuário. 
         11.1 - A contagem de tokens deve ser feita antes de enviar a mensagem para a API DeepSeek IA, garantindo que o usuário esteja ciente do consumo de tokens. ✅
         11.2 - A contagem de tokens deve ser exibida de forma clara na interface, permitindo que o usuário veja quantos tokens foram utilizados na conversa atual. ✅
