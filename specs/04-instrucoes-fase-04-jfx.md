@@ -219,7 +219,33 @@ Não alterar outras funcionalidades
 Garantir que o ./gradlew build está gerando a compilação com sucesso.
 
 ### PASSO 9
-Neste passo deverá ser incluído um link na forma de uma mensagem na conversa original que foi sumarizada.
+- DEFINIÇÕES
+    - Neste passo será alterado o modelo de implementação das telas:
+    - Atualmente, quando a tela de Sumarizações é exibida, uma segunda janela se sobrepõe à janela principal.
+    - É necessário que a estrutura suporte várias telas com Controllers e FXMLs independentes, porém dentro da mesma Janela. 
+        1) Controllers diferentes para cada tela;
+        2) FXMLs diferentes;
+        3) Segregação de Responsabilidades;
+        4) As manutenções em uma funcionalidade não podem impactar na outra;
+        5) Empregue principios de Orientação a Objeto e especialmente Design Patter GoF e Princípios S.O.L.I.D
+        6) Uma única Janela para o sistema com suporte a muitas telas.
+        7) Testes uniários específicos por Tela
+
+- RESTRIÇÕES
+    1) Não alterar NENHUMA funcionalidade existente, APENAS refatorar a SOLUÇÃO TÉCNICA de estrutura de telas.
+    2) Não alterar chamadas a APIs;
+    3) Não aletrar camada de Persistência;
+    4) Não alterar nenhuma lógica funcional
+
+- CRITÉRIOS DE ACEITE
+    1) Garantir que os testes unitários atuais estão rodando: ./gradlew test 
+    2) Criar novos testes unitários necessários para este sexto passo
+    3) Excluir testes unitários que deixem de fazer sentido diante das mudanças deste passo.
+    4) Não alterar outras funcionalidades
+    5) Garantir que o ./gradlew build está gerando a compilação com sucesso.
+
+### PASSO 10
+Neste passo deverá ser incluído um link na forma de uma Mensagem na Conversa original que foi sumarizada.
 Como deverá funcionar:
 1) Quando uma Sumarização for criar, uma mensagem deverá ser adicionada à conversa contendo um link para a Sumarização;
 1.1) A Role dessa mensagem será "SYSTEM"
