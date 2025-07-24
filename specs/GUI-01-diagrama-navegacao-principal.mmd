@@ -1,0 +1,52 @@
+graph TB
+    %% Janela Principal
+    APP[Janela Principal<br/>ApplicationMainController]
+    NAV[NavigationController<br/>Sistema de Navegação]
+    
+    %% Views Principais
+    MAIN[Tela Principal<br/>IntegratedMainController<br/>main-view.fxml]
+    SUMM_VIEW[Tela de Sumarizações<br/>SummarizationsController<br/>summarizations-view.fxml]
+    
+    %% Modais da Tela Principal
+    CONF_MODAL[Modal de Confirmação<br/>SummaryConfirmationController<br/>summary-confirmation.fxml]
+    SUMM_MODAL[Modal de Resultado<br/>SummaryModalController<br/>summary-modal.fxml]
+    
+    %% Fluxo Principal
+    APP --> NAV
+    NAV --> |"1) Exibe tela Principal"| MAIN
+    
+    %% Navegação entre telas
+    MAIN -->|"Solicita tela de Sumarizações"| NAV
+    NAV -.->|"Exibe tela Sumarizações Solicitada"| SUMM_VIEW
+    SUMM_VIEW -.->|"← Voltar para a tela princial"| NAV
+    SUMM_VIEW -->|"Solicita tela Principal para nova Conversa criada a partir da sumarização selecionada"| NAV
+    NAV --> |"Exibe tela Principal com nova conversa selecionada"| MAIN
+    
+    %% Modais da Tela Principal para Sumarização
+    MAIN -->|"Resumir"| CONF_MODAL
+    CONF_MODAL --> |"Confirmar"| SUMM_MODAL
+    CONF_MODAL -.->|"Cancelar"| MAIN
+    SUMM_MODAL -.->|"Fechar"| MAIN
+
+    %% Modal do Processamento de Sumarização
+    SUMM_MODAL -.->|"Exibe Processamndo..."| SUMM_MODAL
+    SUMM_MODAL -.->|"Exibe resultado formatado"| SUMM_MODAL
+    SUMM_MODAL -->|"Solicita Tela Principal a partir da Sumarização criada"| NAV
+    NAV -.-> |"Exibe tela Principal com nova Conversa criada"| MAIN
+    SUMM_MODAL -.->|"Copiar Resultado (Area de Transferência)"| SUMM_MODAL
+    SUMM_MODAL -.->|"Exportar Resultado"| SUMM_MODAL
+    SUMM_MODAL -.->|"Fechar"| MAIN
+
+    %% Links de Navegação
+
+    
+    %% Estilos
+    classDef window fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef view fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef modal fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef navigation fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    
+    class APP window
+    class NAV navigation
+    class MAIN,SUMM_VIEW view
+    class CONF_MODAL,SUMM_MODAL modal

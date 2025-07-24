@@ -1,0 +1,48 @@
+sequenceDiagram
+    participant U as Usuário
+    participant APP as ApplicationMainController
+    participant NAV as NavigationController
+    participant MAIN as IntegratedMainController
+    participant CONF as SummaryConfirmationController
+    participant MODAL as SummaryModalController
+    participant SUMM as SummarizationsController
+    
+    %% Inicialização
+    U->>APP: Inicia aplicação
+    APP->>NAV: Solicita tela principal
+    NAV->>MAIN: Exibe tela principal
+    MAIN-->>U: Exibe conversas
+    
+    %% Fluxo de Sumarização
+    U->>MAIN: Clica "Resumir"
+    MAIN->>CONF: Abre modal de confirmação
+    U->>CONF: Clica "Confirmar Sumarização"
+    CONF->>MODAL: Abre modal de resultado
+    MODAL->>MODAL: Exibe processando
+    MODAL->>MODAL: Executa sumarização (Assíncrona)
+     MODAL-->>U: Exibe resultado formatado em Markdown
+    
+    %% Nova Conversa
+    U->>MODAL: Clica "Nova Conversa"
+    MODAL->>MODAL: Cria nova conversa e fecha modal
+    MODAL->>NAV: Solicita tela principal
+    NAV->>MAIN: Atualiza lista e seleciona nova conversa
+    MAIN-->>U: Exibe lista e seleciona nova conversa
+    U->>MODAL: Clica "Copiar Resultado (Área de Transferência)"
+    U->>MODAL: Clica "Exportar Resultado"
+    
+    %% Navegação para Sumarizações
+    U->>MAIN: Clica "Sumarizações"
+    MAIN->>NAV: Solicita a tela de sumarizações
+    NAV->>SUMM: Exibe tela de sumarizações
+    SUMM-->>U: Exibe lista de sumarizações
+    
+    %% Links de Sumarização
+    U->>SUMM: Clica link em uma sumarização
+    SUMM->>SUMM: Exibe a sumarização selecionada
+    SUMM->>NAV: Criar nova conversa
+    NAV->>MAIN: Seleciona conversa específica (Nova conversa)
+    MAIN-->>U: Exibe conversa selecionada (Nova conversa)
+    SUMM->>NAV: Voltar
+    NAV->>MAIN: Exibe tela principal
+    MAIN-->>U: Exibe conversas

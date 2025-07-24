@@ -3,5 +3,6 @@ Leia os arquivos:
 /specs/04-instrucoes-fase-04-jfx.md
 /specs/FASE-04-IMPLEMENTACAO-EM-ANDAMENTO.md
 /specs/database-schema.md
+/specs/gui.md
 
-Conforme indicado em "PASSOS DO PROCESSO" execute exclusivamente o "PASSO 8"
+Conforme indicado em "PASSOS DO PROCESSO" execute exclusivamente o "PASSO 9"

@@ -1,0 +1,10 @@
+stateDiagram-v2
+    [*] --> Initial
+    Initial --> ConversationSelected : Seleciona conversa
+    Initial --> Empty : Sem conversas
+    Empty --> NovaConversa : Clica em "Nova Conversa"
+    NovaConversa --> ConversationSelected : Nova conversa criada
+    ConversationSelected --> Summarizing : Clica "Resumir"
+    Summarizing --> ConversationSelected : Sumarização completa
+    ConversationSelected --> SummarizationsView : Clica "Sumarizações"
+    SummarizationsView --> ConversationSelected : Volta da tela

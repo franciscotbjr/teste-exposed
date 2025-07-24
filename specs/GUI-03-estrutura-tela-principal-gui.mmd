@@ -1,0 +1,59 @@
+flowchart TD
+    subgraph main[" "]
+        direction LR
+        subgraph left_panel["Painel Esquerdo"]
+            direction TB
+            new_btn[Botão: Nova Conversa]:::button
+            conv_list[Lista de Conversas]:::list
+            conv_list --> conv1{{"Conversa 1"}}:::item
+            conv_list --> conv2{{"Conversa 2"}}:::item
+            conv_list --> conv3{{"Conversa 3"}}:::item
+        end
+
+        subgraph right_panel["Painel Direito"]
+            direction TB
+            header[Título da Conversa]:::header
+            summary_btn[Criar Resumo]:::button
+            chat_area[Área de Mensagens]:::area
+            user_msg["Você: Olá, como funciona isso?"]:::usermsg
+            ai_msg["Assistente: Posso ajudar com informações!"]:::aimsg
+            
+            subgraph input_area[" "]
+                direction TB
+                input_field[Digite sua mensagem...]:::input
+                actions> ]:::actions
+                send_btn[Enviar]:::button
+            end
+        end
+    end
+
+    %% Conexões entre áreas
+    left_panel --> right_panel
+    header --> chat_area
+    chat_area --> user_msg
+    chat_area --> ai_msg
+    chat_area --> input_area
+    input_field --> actions
+    actions --> send_btn
+
+    classDef panel fill:#f0f0f0,stroke:#ddd,stroke-width:2px
+    classDef list fill:#fff,stroke:#bbb,stroke-width:1px
+    classDef item fill:#e6f7ff,stroke:#91d5ff
+    classDef area fill:#fff,stroke:#ddd,stroke-width:1px
+    classDef button fill:#1890ff,stroke:#096dd9,color:white
+    classDef input fill:#fff,stroke:#ddd,stroke-width:1px
+    classDef actions fill:transparent,stroke:none
+    classDef usermsg fill:#e6f7ff,stroke:#91d5ff
+    classDef aimsg fill:#f6ffed,stroke:#b7eb8f
+    classDef header fill:#fafafa,stroke:#ddd,stroke-width:1px
+    
+    class left_panel,right_panel panel
+    class conv_list list
+    class conv1,conv2,conv3 item
+    class chat_area area
+    class input_field input
+    class actions actions
+    class new_btn,send_btn,summary_btn button
+    class user_msg usermsg
+    class ai_msg aimsg
+    class header header
