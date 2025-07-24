@@ -13,16 +13,25 @@ flowchart TD
         subgraph right_panel["Painel Direito"]
             direction TB
             header[Título da Conversa]:::header
-            summary_btn[Criar Resumo]:::button
             chat_area[Área de Mensagens]:::area
-            user_msg["Você: Olá, como funciona isso?"]:::usermsg
-            ai_msg["Assistente: Posso ajudar com informações!"]:::aimsg
-            
-            subgraph input_area[" "]
+                        
+            subgraph input_area_centro["Centro"]
+                direction TB
+                user_msg["Você: Olá, como funciona isso?"]:::usermsg
+                ai_msg["Assistente: Posso ajudar com informações!"]:::aimsg
+            end
+
+            subgraph input_area_rodape["Rodapé"]
                 direction TB
                 input_field[Digite sua mensagem...]:::input
-                actions> ]:::actions
+                actions_rodape> ]:::actions
                 send_btn[Enviar]:::button
+            end
+
+            subgraph input_topo["Topo"]
+                direction TB
+                actions_topo> ]:::actions
+                summary_btn[Criar Resumo]:::button
             end
         end
     end
@@ -30,11 +39,12 @@ flowchart TD
     %% Conexões entre áreas
     left_panel --> right_panel
     header --> chat_area
-    chat_area --> user_msg
-    chat_area --> ai_msg
-    chat_area --> input_area
-    input_field --> actions
-    actions --> send_btn
+    user_msg --> ai_msg
+    chat_area --> input_area_centro
+    chat_area --> input_area_rodape
+    chat_area --> input_topo
+    input_field --> send_btn
+    actions_topo --> summary_btn
 
     classDef panel fill:#f0f0f0,stroke:#ddd,stroke-width:2px
     classDef list fill:#fff,stroke:#bbb,stroke-width:1px

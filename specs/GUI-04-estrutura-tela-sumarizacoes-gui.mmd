@@ -14,8 +14,18 @@ flowchart TD
             direction TB
             header[Título da Sumarização]:::header
             chat_area[Área de Sumarização]:::area
-            txt_sumarizacao["System: Este é o Resumo"]:::usermsg
             
+            subgraph input_topo["Topo"]
+                direction TB
+                actions_topo> ]:::actions
+                new_chat_btn[Criar Conversa]:::button
+            end
+            
+            subgraph input_area_centro["Centro"]
+                direction TB
+                txt_sumarizacao["System: Este é o Resumo"]:::usermsg
+            end
+
             subgraph input_rodape["Rodape"]
                 direction TB
                 actions_rodape> ]:::actions
@@ -23,11 +33,6 @@ flowchart TD
                 export_btn[Exportar]:::button
             end
 
-            subgraph input_topo["Topo"]
-                direction TB
-                actions_topo> ]:::actions
-                new_chat_btn[Criar Conversa]:::button
-            end
 
         end
     end
@@ -35,7 +40,9 @@ flowchart TD
     %% Conexões entre áreas
     left_panel --> right_panel
     header --> chat_area
-    chat_area --> txt_sumarizacao
+    chat_area --> input_area_centro
+    chat_area --> input_rodape
+    chat_area --> input_topo
     actions_rodape --> copy_btn
     actions_rodape --> export_btn
     actions_topo --> new_chat_btn
