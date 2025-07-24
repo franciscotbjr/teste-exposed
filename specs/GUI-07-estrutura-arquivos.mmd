@@ -1,0 +1,41 @@
+graph LR
+    subgraph "Controllers"
+        AC[ApplicationMainController]
+        IMC[IntegratedMainController]
+        SC[SummarizationsController]
+        SMC[SummaryModalController]
+        SCC[SummaryConfirmationController]
+        NC[NavigationController]
+    end
+    
+    subgraph "FXML Views"
+        AM[application-main.fxml]
+        MV[main-view.fxml]
+        SV[summarizations-view.fxml]
+        SM[summary-modal.fxml]
+        SCF[summary-confirmation.fxml]
+    end
+    
+    subgraph "CSS Styles"
+        MS[main-style.css]
+    end
+    
+    %% Relacionamentos
+    AC -.-> AM
+    IMC -.-> MV
+    SC -.-> SV
+    SMC -.-> SM
+    SCC -.-> SCF
+    
+    MV -.-> MS
+    SV -.-> MS
+    SM -.-> MS
+    SCF -.-> MS
+    
+    classDef controller fill:#bbdefb,stroke:#1976d2
+    classDef fxml fill:#c8e6c9,stroke:#388e3c
+    classDef css fill:#ffecb3,stroke:#f57c00
+    
+    class AC,IMC,SC,SMC,SCC,NC controller
+    class AM,MV,SV,SM,SCF fxml
+    class MS css
