@@ -20,7 +20,7 @@ flowchart TD
                 actions_topo> ]:::actions
                 new_chat_btn[Criar Conversa]:::button
             end
-            
+
             subgraph input_area_centro["Centro"]
                 direction TB
                 txt_sumarizacao["System: Este é o Resumo"]:::usermsg
@@ -40,9 +40,9 @@ flowchart TD
     %% Conexões entre áreas
     left_panel --> right_panel
     header --> chat_area
+    chat_area --> input_topo
     chat_area --> input_area_centro
     chat_area --> input_rodape
-    chat_area --> input_topo
     actions_rodape --> copy_btn
     actions_rodape --> export_btn
     actions_topo --> new_chat_btn
